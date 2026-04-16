@@ -64,7 +64,7 @@ All database access is encapsulated in a `Repository` class, separating your bus
 
 ### Pydantic Data Modeling
 
-All input/output models are defined using [Pydantic](https://docs.pydantic.dev/), giving you automatic validation, serialization, and type safety. Models use `alias_generator=to_camel`, so JSON payloads use camelCase while Python code uses snake_case — consistent with AWS service conventions.
+All input/output models are defined using [Pydantic](https://docs.pydantic.dev/), giving you automatic validation, serialization, and type safety.
 
 ```python
 from uuid import uuid4
@@ -85,8 +85,6 @@ Every template ships with a matching [AWS CDK](https://aws.amazon.com/cdk) stack
 
 ```bash
 make deploy STACK=api
-make deploy STACK=sqs
-make deploy STACK=agent
 ```
 
 No manual console clicks. No documentation to update. The infrastructure is the code.
@@ -125,41 +123,6 @@ make test
 ## AWS Lambda Powertools — In Practice
 
 Every template integrates [**AWS Lambda Powertools for Python**](https://docs.aws.amazon.com/powertools/python) as a first-class citizen — not as an afterthought bolted on after the fact. Here's how it actually shapes each template.
-
-### Structured Logging That Travels With Your Request
-
-The logger is initialized once at module level and injected into every handler via the `@logger.inject_lambda_context` decorator. This automatically appends the Lambda context (function name, version, cold start flag, and AWS request ID) to every log line — without you writing a single line of configuration code.
-
-```python
-from aws_lambda_powertools import Logger
-
-logger = Logger(service="api")
-
-@logger.inject_lambda_context(log_event=True)
-def handler(event: APIGatewayProxyEventV2, context: LambdaContext) -> dict:
-    logger.info("Processing request", path=event.path, method=event.http_method)
-    ...
-```
-
-
-The output in CloudWatch is structured JSON from the first line:
-
-```json
-{
-  "level": "INFO",
-  "message": "Processing request",
-  "path": "/users",
-  "method": "GET",
-  "service": "api",
-  "function_name": "my-api-handler",
-  "cold_start": true,
-  "aws_request_id": "abc-123"
-}
-```
-
-**This matters at scale**: CloudWatch Logs Insights can now query your logs by any of these fields. Finding all cold starts, or all errors on a specific path, becomes a one-line query instead of a regex hunt through raw strings.
-
-<!-- Across scenarios, the logger adapts. In the EventBridge template, correlation IDs from upstream events are appended automatically. In the SQS template, the message ID is injected per-record so you can trace exactly which message caused a failure. -->
 
 ### Batch Processing with Partial Failure Handling
 
@@ -216,7 +179,7 @@ def main(event, context):
     )
 ```
 
-### Event Handling
+### Event Parsing and Handling
 
 Lambda Powertools really shines here. Whether it’s handling a Bedrock Agent tool use, REST API request, or a GraphQL query, Powertools provides resolvers that eliminate custom event parsing.
 
@@ -261,16 +224,27 @@ def create_item() -> Response:
     """Create a new item from the request body"""
     body = app.current_event.json_body
     ...
-    return Response(status_code=201, content_type="application/json", body=dumps(item.dump()))
+    return Response(status_code=201, content_type="application/json", body=dumps(item))
 
 def main(event: dict, context: LambdaContext) -> dict:
     """Lambda entry point for the API Gateway handler"""
     return app.resolve(event, context)
 ```
 
-### Combining Powertools with Pydantic: Event Parsing
+The **EventBridge** template uses the `event_parser` to ensure your events match your Pydantic models before your logic even runs:
 
-One of the most useful patterns across the templates is combining Powertools' event data classes with Pydantic models for end-to-end type safety.
+```python
+from aws_lambda_powertools.utilities.parser import event_parser
+from aws_lambda_powertools.utilities.parser.models import EventBridgeModel
+
+@event_parser(model=EventBridgeModel)
+def main(event: EventBridgeModel, context) -> None:
+    handle(event)
+```
+
+### Combining Powertools with Pydantic
+
+One of the most useful patterns across the templates is combining Powertools event data classes with Pydantic models for end-to-end type safety.
 
 Powertools parses the raw Lambda event into a typed object (so you're not indexing into raw dicts). Pydantic then validates and deserializes the *business payload* within that event:
 
@@ -292,7 +266,7 @@ def create_item() -> Response:
     ...
     return Response(status_code=201, content_type="application/json", body=dumps(item.dump()))
 ```
-<!-- 
+
 In the **Bedrock Agent** template, the same pattern applies via `BedrockAgentFunctionResolver` — Powertools resolves the agent event, and typed function signatures replace manual parameter extraction:
 
 ```python
@@ -322,22 +296,12 @@ def create_item(item_id: str, name: str, description: str | None = None) -> dict
 def main(event: BedrockAgentEvent, context: LambdaContext) -> dict:
     """Lambda entry point for the Bedrock Agent handler"""
     return app.resolve(event, context)
-``` -->
-
-The **EventBridge** template uses the `event_parser` to ensure your events match your Pydantic models before your logic even runs:
-
-```python
-from aws_lambda_powertools.utilities.parser import event_parser
-from aws_lambda_powertools.utilities.parser.models import EventBridgeModel
-
-@event_parser(model=EventBridgeModel)
-def main(event: EventBridgeModel, context) -> None:
-    handle(event)
 ```
+
 
 ### Fetching Parameters and Secrets
 
-In the **EventBridge** template, the handler calls an external API with an API token stored in the **Secrets Manager**. With Lambda Powertools, that adds exactly three lines of code:
+In the **EventBridge** template, the handler calls an external API using an API token stored in the **Secrets Manager**. With Lambda Powertools, that adds exactly three lines of code:
 
 ```python
 from aws_lambda_powertools.utilities.parameters import SecretsProvider
@@ -357,6 +321,38 @@ provider = SSMProvider()
 configuration = provider.get(key)
 ```
 
+### Structured Logging That Travels With Your Request
+
+The logger is initialized once at module level and injected into every handler via the `@logger.inject_lambda_context` decorator. This automatically appends the Lambda context (function name, version, cold start flag, and AWS request ID) to every log line — without you writing a single line of configuration code.
+
+```python
+from aws_lambda_powertools import Logger
+
+logger = Logger(service="api")
+
+@logger.inject_lambda_context(log_event=True)
+def handler(event: APIGatewayProxyEventV2, context: LambdaContext) -> dict:
+    logger.info("Processing request", path=event.path, method=event.http_method)
+    ...
+```
+
+The output in CloudWatch is structured JSON from the first line:
+
+```json
+{
+  "level": "INFO",
+  "message": "Processing request",
+  "path": "/users",
+  "method": "GET",
+  "service": "api",
+  "function_name": "my-api-handler",
+  "cold_start": true,
+  "aws_request_id": "abc-123"
+}
+```
+
+**This matters at scale**: CloudWatch Logs Insights can now query your logs by any of these fields. Finding all cold starts, or all errors on a specific path, becomes a one-line query instead of a regex hunt through raw strings.
+
 ### Tracing Without Instrumentation Noise
 
 X-Ray tracing is applied via two decorators that require no additional configuration:
@@ -368,8 +364,8 @@ tracer = Tracer(service=settings.service_name)
 
 # On methods — creates child subsegments in X-Ray
 @tracer.capture_method
-def handle_record(self, record: SQSRecord) -> None:
-    ...
+def handle_record(record: SQSRecord) -> None:
+    repository.put_item(process(record.body))
 
 # On the Lambda handler — creates the root X-Ray segment
 @tracer.capture_lambda_handler
@@ -403,7 +399,6 @@ def main(event: dict, context: LambdaContext) -> dict:
 The `@metrics.log_metrics` decorator flushes all buffered metrics at the end of each invocation as a single EMF-formatted log line — CloudWatch automatically parses it and makes those metrics available in dashboards and alarms without any additional infrastructure.
 
 **`capture_cold_start_metric=True`** is a one-liner that adds a `ColdStart` metric to every function automatically. In production, tracking cold starts per function gives you a clear signal for when to invest in provisioned concurrency — no custom instrumentation needed.
-
 
 
 ## Getting Started in Under 5 Minutes
@@ -455,11 +450,10 @@ It's production-ready for the AI-native workloads being built today.
 
 The repository is open source under the MIT license. Contributions are welcome — whether that's a new template scenario, improved infrastructure code, additional test coverage, or documentation improvements. Check out the [contributing guidelines](https://github.com/amrabed/aws-lambda-templates/blob/main/docs/CONTRIBUTING.md) to get started.
 
-## Conclusion: Focus on Business Logic, Not Infrastructure
+---
 
 If you're building on AWS Lambda and you find yourself writing the same setup for the third time, I hope `aws-lambda-templates` saves you that time and helps you ship better, more consistent serverless code.
 
 
 **Ready to start?** Head over to the repository and click **"Use this template"**:
-
 👉 [**github.com/amrabed/aws-lambda-templates**](https://github.com/amrabed/aws-lambda-templates)

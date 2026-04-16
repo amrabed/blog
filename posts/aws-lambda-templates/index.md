@@ -1,6 +1,6 @@
 # Stop Writing Lambda Boilerplate
 
-**Accelerate your serverless development with production-grade Python templates for AWS Lambda, pre-wired with best practices and modern tooling.**
+<!-- **Accelerate your serverless development with production-grade Python templates for AWS Lambda, pre-wired with best practices and modern tooling.** -->
 
 Introducing the [**aws-lambda-templates**](https://github.com/amrabed/aws-lambda-templates) open-source repository — a collection of production-ready Python Lambda templates for Bedrock Agent, REST API, GraphQL, DynamoDB Stream, EventBridge, S3, and SQS scenarios. These templates come pre-integrated with **AWS Lambda Powertools**, **AWS CDK**, **Pydantic**, and a robust testing infrastructure.
 
@@ -58,10 +58,6 @@ Every template integrates [AWS Lambda Powertools for Python](https://docs.aws.am
 
 You don't configure any of this — it's already there. More on that later.
 
-### Clean Architecture with the Repository Pattern
-
-All database access is encapsulated in a `Repository` class, separating your business logic from AWS service calls. This makes testing trivial and keeps your handler functions focused on what matters: the business logic.
-
 ### Pydantic Data Modeling
 
 All input/output models are defined using [Pydantic](https://docs.pydantic.dev/), giving you automatic validation, serialization, and type safety.
@@ -88,6 +84,10 @@ make deploy STACK=api
 ```
 
 No manual console clicks. No documentation to update. The infrastructure is the code.
+
+### Clean Architecture with the Repository Pattern
+
+All database access is encapsulated in a `Repository` class, separating your business logic from AWS service calls. This makes testing trivial and keeps your handler functions focused on what matters: the business logic.
 
 ### Testing That Actually Tests Things
 
@@ -204,7 +204,7 @@ def main(event: BedrockAgentEvent, context: LambdaContext) -> dict:
     return app.resolve(event, context)
 ```
 
-The **REST API** template uses the `APIGatewayRestResolver` and Flask-like decorators - meaning if you've used Flask or FastAPI, you'll feel right at home:
+The **REST API** template uses the `APIGatewayRestResolver` and Flask-like decorators — meaning if you've used Flask or FastAPI, you'll feel right at home:
 
 ```python
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
@@ -456,4 +456,5 @@ If you're building on AWS Lambda and you find yourself writing the same setup fo
 
 
 **Ready to start?** Head over to the repository and click **"Use this template"**:
+
 👉 [**github.com/amrabed/aws-lambda-templates**](https://github.com/amrabed/aws-lambda-templates)

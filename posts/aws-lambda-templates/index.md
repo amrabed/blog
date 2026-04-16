@@ -1,16 +1,19 @@
 # Stop Writing Lambda Boilerplate
 
-Introducing the aws-lambda-templates open-source repository — production-ready Python Lambda templates for Bedrock Agent, REST API, GraphQL, DynamoDB Stream, EventBridge, S3, and SQS scenarios, pre-wired with AWS Lambda Powertools, CDK, Pydantic, and full testing infrastructure.
+**Accelerate your serverless development with production-grade Python templates for AWS Lambda, pre-wired with best practices and modern tooling.**
+
+Introducing the [**aws-lambda-templates**](https://github.com/amrabed/aws-lambda-templates) open-source repository — a collection of production-ready Python Lambda templates for Bedrock Agent, REST API, GraphQL, DynamoDB Stream, EventBridge, S3, and SQS scenarios. These templates come pre-integrated with **AWS Lambda Powertools**, **AWS CDK**, **Pydantic**, and a robust testing infrastructure.
 
 ---
 
 ![cover.png](cover.png)
 
+
 Every serverless developer knows the feeling. You spin up a new Lambda project, and before writing a single line of business logic, you're already copying boilerplate from a previous project: setting up AWS Lambda Powertools, wiring up structured logging, configuring X-Ray tracing, and building yet another Repository class for DynamoDB access.
 
 This repetitive setup isn't just tedious — it's a source of inconsistency across projects and a hidden risk. Teams often skip best practices under time pressure, and the "quick Lambda" becomes the undocumented, untested function that nobody dares touch six months later.
 
-That's why I built [**aws-lambda-templates**](https://github.com/amrabed/aws-lambda-templates) — a collection of production-ready, plug-and-play Python Lambda templates for some of the most common real-world scenarios on AWS.
+That's why I built [**aws-lambda-templates**](https://github.com/amrabed/aws-lambda-templates) — a collection of production-ready, plug-and-play Python Lambda templates for some of the common real-world scenarios on AWS.
 
 ## The Problem with Lambda Bootstrapping
 
@@ -64,7 +67,6 @@ All database access is encapsulated in a `Repository` class, separating your bus
 All input/output models are defined using [Pydantic](https://docs.pydantic.dev/), giving you automatic validation, serialization, and type safety. Models use `alias_generator=to_camel`, so JSON payloads use camelCase while Python code uses snake_case — consistent with AWS service conventions.
 
 ```python
-from typing import Any
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
@@ -73,11 +75,6 @@ from pydantic.alias_generators import to_camel
 class Item(BaseModel, alias_generator=to_camel, populate_by_name=True):
     id: str = Field(description="Unique item identifier", default_factory=lambda: str(uuid4()))
     name: str = Field(description="Human-readable item name")
-
-    def dump(self, **kwargs: Any) -> dict:
-        kwargs.setdefault("by_alias", True)
-        kwargs.setdefault("exclude_none", True)
-        return self.model_dump(**kwargs)
 ```
 
 The `alias_generator=to_camel` configuration means the JSON payload from API Gateway uses `camelCase` while the Python code uses `snake_case` — matching JSON conventions on the wire and Python conventions in code, with zero manual mapping.
@@ -120,103 +117,30 @@ make test
 
 - [**Dev Containers**](https://code.visualstudio.com/docs/devcontainers/containers) support means you can open the repo in VS Code and have the entire development environment running in Docker — Python, Poetry, CDK, and all tools pre-installed—no setup required.
 
-[**MkDocs](https://www.mkdocs.org/)** for auto-generated API documentation published to GitHub Pages
+- [**MkDocs**](https://www.mkdocs.org/) for auto-generated API documentation published to GitHub Pages
 
 - [**GitHub Actions**](https://github.com/features/actions) workflows for CI/CD and documentation deployment
 - **AI Agent guidelines** (`AGENTS.md`) providing context for AI coding assistants working in the repo
 
-## **AWS Lambda Powertools — In Practice**
+## AWS Lambda Powertools — In Practice
 
 Every template integrates [**AWS Lambda Powertools for Python**](https://docs.aws.amazon.com/powertools/python) as a first-class citizen — not as an afterthought bolted on after the fact. Here's how it actually shapes each template.
 
-### **Structured Logging That Travels With Your Request**
+### Structured Logging That Travels With Your Request
 
 The logger is initialized once at module level and injected into every handler via the `@logger.inject_lambda_context` decorator. This automatically appends the Lambda context (function name, version, cold start flag, and AWS request ID) to every log line — without you writing a single line of configuration code.
 
 ```python
-from json import dumps, loads
+from aws_lambda_powertools import Logger
 
-from aws_lambda_powertools import Logger, Metrics, Tracer
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-from aws_lambda_powertools.event_handler.api_gateway import Response
-from aws_lambda_powertools.utilities.typing import LambdaContext
-from pydantic import ValidationError
+logger = Logger(service="api")
 
-from templates.api.models import Item
-from templates.api.settings import Settings
-from templates.repository import Repository
-
-settings = Settings()
-
-logger = Logger(service=settings.service_name)
-tracer = Tracer(service=settings.service_name)
-metrics = Metrics(namespace=settings.metrics_namespace)
-
-repository = Repository(settings.table_name)
-app = APIGatewayRestResolver()
-
-@app.get("/items/<id>")
-def get_item(id: str) -> Response:
-    """Retrieve an item by ID.
-
-    Args:
-        id: The unique identifier of the item.
-
-    Returns:
-        200 with the item, 404 if not found, or 500 on error.
-    """
-    try:
-        item = repository.get_item(id)
-    except Exception as exc:
-        logger.error("DynamoDB get_item failed", exc_info=exc)
-        return Response(
-            status_code=500, content_type="application/json", body=dumps({"message": "Internal server error"})
-        )
-
-    if item is None:
-        return Response(status_code=404, content_type="application/json", body=dumps({"message": "Not found"}))
-
-    return Response(status_code=200, content_type="application/json", body=dumps(item))
-
-@app.post("/items")
-def create_item() -> Response:
-    """Create a new item from the request body.
-
-    Returns:
-        201 with the created item, 422 on validation error, or 500 on error.
-    """
-    body = app.current_event.json_body
-
-    try:
-        item = Item.model_validate(body)
-    except ValidationError as exc:
-        return Response(status_code=422, content_type="application/json", body=dumps({"errors": loads(exc.json())}))
-
-    try:
-        repository.put_item(item.model_dump())
-    except Exception as exc:
-        logger.error("DynamoDB put_item failed", exc_info=exc)
-        return Response(
-            status_code=500, content_type="application/json", body=dumps({"message": "Internal server error"})
-        )
-
-    return Response(status_code=201, content_type="application/json", body=dumps(item.dump()))
-
-@logger.inject_lambda_context
-@tracer.capture_lambda_handler
-@metrics.log_metrics
-def main(event: dict, context: LambdaContext) -> dict:
-    """Lambda entry point for the API Gateway handler.
-
-    Args:
-        event: The API Gateway proxy event.
-        context: The Lambda execution context.
-
-    Returns:
-        The API Gateway proxy response.
-    """
-    return app.resolve(event, context)
+@logger.inject_lambda_context(log_event=True)
+def handler(event: APIGatewayProxyEventV2, context: LambdaContext) -> dict:
+    logger.info("Processing request", path=event.path, method=event.http_method)
+    ...
 ```
+
 
 The output in CloudWatch is structured JSON from the first line:
 
@@ -235,92 +159,205 @@ The output in CloudWatch is structured JSON from the first line:
 
 **This matters at scale**: CloudWatch Logs Insights can now query your logs by any of these fields. Finding all cold starts, or all errors on a specific path, becomes a one-line query instead of a regex hunt through raw strings.
 
-Across scenarios, the logger adapts. In the EventBridge template, correlation IDs from upstream events are appended automatically. In the SQS template, the message ID is injected per-record so you can trace exactly which message caused a failure.
+<!-- Across scenarios, the logger adapts. In the EventBridge template, correlation IDs from upstream events are appended automatically. In the SQS template, the message ID is injected per-record so you can trace exactly which message caused a failure. -->
 
-### **Batch Processing with Partial Failure Handling**
+### Batch Processing with Partial Failure Handling
 
 This is where Powertools saves the most code — and prevents the most production incidents.
 
-Without Powertools, batch processing from SQS or streams requires you to manually track which records succeeded and which failed, then construct a `batchItemFailures` response telling Lambda which messages to retry. Get it wrong and you either re-process successfully handled messages (causing duplicates) or silently drop failed ones.
+Without Powertools, batch processing from SQS or streams requires you to manually track which records succeeded and which failed, then construct a `batchItemFailures` response telling Lambda which messages to retry. Get it wrong and you either re-process successfully handled messages (causing duplicates) or silently drop failed ones.
 
-The SQS template uses `BatchProcessor` to handle this automatically:
+The **SQS** template uses `BatchProcessor` to handle this automatically:
 
 ```python
 from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, process_partial_response
 from aws_lambda_powertools.utilities.batch.types import PartialItemFailureResponse
 
-processor = **BatchProcessor**(event_type=EventType.SQS)
+processor = BatchProcessor(event_type=EventType.SQS)
 
-def handle_record(self, record: SQSRecord) -> None:
-    message = SqsMessage.model_validate(record.json_body)
-    processed = ProcessedItem(id=message.id, content=message.content, status="PROCESSED")
-    self._repository.put_item(processed.model_dump())
-    logger.info("Successfully processed and stored message", extra={"messageId": message.id})
+def handle_record(record) -> None:
+    try:
+        ...
+    except Exception as exc:
+        logger.error("Failed to process record", exc_info=exc)
+        raise  # Re-raise so BatchProcessor marks it as a failed item
 
-def main(event, context) -> **PartialItemFailureResponse**:
-    return **process_partial_response**(
+def main(event, context) -> PartialItemFailureResponse:
+    return process_partial_response(
         event=event,
-        record_handler=**handle_record**,
+        record_handler=handle_record,
         processor=processor,
         context=context,
     )
 ```
 
-If `handle_record` raises for one message, `BatchProcessor` catches it, logs the failure, continues processing the rest of the batch, and returns the correct `batchItemFailures` response. Your DLQ only receives the genuinely failed messages — not the whole batch.
+If `handle_record` raises for one message, `BatchProcessor` catches it, logs the failure, continues processing the rest of the batch, and returns the correct `batchItemFailures` response. Your DLQ only receives the genuinely failed messages — not the whole batch.
+
+The same pattern applies to **DynamoDB Streams**, where handling partial failures is equally critical to prevent stream stalls:
+
+```python
+from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, process_partial_response
+
+processor = BatchProcessor(event_type=EventType.DynamoDBStreams)
+
+def handle_record(record):
+    try:
+        ...
+    except Exception as exc:
+        logger.error("Failed to process record", exc_info=exc)
+        raise  # Re-raise so BatchProcessor marks it as a failed item
+
+def main(event, context):
+    return process_partial_response(
+        event=event, 
+        record_handler=handle_record,
+        processor=processor, 
+        context=context,
+    )
+```
 
 ### Event Handling
 
-Lambda Powertools really shines here. Whether it’s handling a Bedrock Agent tool, REST API request, or a GraphQL query, the Powertools provides just the resolver that saves you all the boilerplate code.
+Lambda Powertools really shines here. Whether it’s handling a Bedrock Agent tool use, REST API request, or a GraphQL query, Powertools provides resolvers that eliminate custom event parsing.
 
-The Agent tool template uses the `BedrockAgentFunctionResolver` and the `@app.tool` decorator:
+The **Bedrock Agent** template uses the `BedrockAgentFunctionResolver` and the `@app.tool` decorator:
 
 ```python
 from aws_lambda_powertools.event_handler import BedrockAgentFunctionResolver
 from aws_lambda_powertools.utilities.data_classes import BedrockAgentEvent
 
-**app = BedrockAgentFunctionResolver()**
+app = BedrockAgentFunctionResolver()
 
-**@app.tool**(name="getItem", description="Gets item details by ID")
+@app.tool(name="getItem", description="Gets item details by ID")
 def get_item(item_id: str) -> dict:
     ...
 
-**@app.tool**(name="createItem", description="Creates a new item with name and optional description")
+@app.tool(name="createItem", description="Creates a new item with name and optional description")
 def create_item(item_id: str, name: str, description: str | None = None) -> dict:
     ...
 
 def main(event: BedrockAgentEvent, context: LambdaContext) -> dict:
     """Lambda entry point for the Bedrock Agent handler"""
-    return **app.resolve**(event, context)
+    return app.resolve(event, context)
 ```
 
-The REST API template uses the `APIGatewayRestResolver` and the Flask-like decorators— so if you are already using Flask (or similar library), you only need to change a couple of lines:
+The **REST API** template uses the `APIGatewayRestResolver` and Flask-like decorators - meaning if you've used Flask or FastAPI, you'll feel right at home:
 
 ```python
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.api_gateway import Response
 
-**app = APIGatewayRestResolver()**
+app = APIGatewayRestResolver()
 
-**@app.get**("/items/<id>")
+@app.get("/items/<id>")
 def get_item(id: str) -> Response:
     """Retrieve an item by ID"""
     ...
 
-    return **Response**(status_code=200, content_type="application/json", body=dumps(item))
+    return Response(status_code=200, content_type="application/json", body=dumps(item))
 
-**@app.post**("/items")
+@app.post("/items")
 def create_item() -> Response:
     """Create a new item from the request body"""
     body = app.current_event.json_body
     ...
-    return **Response**(status_code=201, content_type="application/json", body=dumps(item.dump()))
+    return Response(status_code=201, content_type="application/json", body=dumps(item.dump()))
 
 def main(event: dict, context: LambdaContext) -> dict:
     """Lambda entry point for the API Gateway handler"""
-    return **app.resolve**(event, context)
+    return app.resolve(event, context)
 ```
 
-### **Tracing Without Instrumentation Noise**
+### Combining Powertools with Pydantic: Event Parsing
+
+One of the most useful patterns across the templates is combining Powertools' event data classes with Pydantic models for end-to-end type safety.
+
+Powertools parses the raw Lambda event into a typed object (so you're not indexing into raw dicts). Pydantic then validates and deserializes the *business payload* within that event:
+
+```python
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver
+from pydantic import ValidationError
+
+app = APIGatewayRestResolver()
+
+@app.post("/items")
+def create_item() -> Response:
+    # Powertools resolves the typed API Gateway envelope
+    body = app.current_event.json_body
+    # Pydantic validates the business payload
+    try:
+        item = Item.model_validate(body)
+    except ValidationError as exc:
+        return Response(status_code=422, content_type="application/json", body=dumps({"error": "..."}))
+    ...
+    return Response(status_code=201, content_type="application/json", body=dumps(item.dump()))
+```
+<!-- 
+In the **Bedrock Agent** template, the same pattern applies via `BedrockAgentFunctionResolver` — Powertools resolves the agent event, and typed function signatures replace manual parameter extraction:
+
+```python
+# templates/agent/handler.py
+from aws_lambda_powertools.event_handler import BedrockAgentFunctionResolver
+from aws_lambda_powertools.utilities.data_classes import BedrockAgentEvent
+from aws_lambda_powertools.utilities.typing import LambdaContext
+
+from templates.agent.models import Item
+
+repository = Repository(settings.table_name)
+app = BedrockAgentFunctionResolver()
+
+@app.tool(name="getItem", description="Gets item details by ID")
+def get_item(item_id: str) -> dict:
+    item = repository.get_item(item_id)
+    if not item:
+        return {"error": f"Item {item_id} not found"}
+    return item
+
+@app.tool(name="createItem", description="Creates a new item with name and optional description")
+def create_item(item_id: str, name: str, description: str | None = None) -> dict:
+    item = Item(id=item_id, name=name, description=description)
+    repository.put_item(item.model_dump())
+    return item.model_dump(by_alias=True, exclude_none=True)
+
+def main(event: BedrockAgentEvent, context: LambdaContext) -> dict:
+    """Lambda entry point for the Bedrock Agent handler"""
+    return app.resolve(event, context)
+``` -->
+
+The **EventBridge** template uses the `event_parser` to ensure your events match your Pydantic models before your logic even runs:
+
+```python
+from aws_lambda_powertools.utilities.parser import event_parser
+from aws_lambda_powertools.utilities.parser.models import EventBridgeModel
+
+@event_parser(model=EventBridgeModel)
+def main(event: EventBridgeModel, context) -> None:
+    handle(event)
+```
+
+### Fetching Parameters and Secrets
+
+In the **EventBridge** template, the handler calls an external API with an API token stored in the **Secrets Manager**. With Lambda Powertools, that adds exactly three lines of code:
+
+```python
+from aws_lambda_powertools.utilities.parameters import SecretsProvider
+
+secret_provider = SecretsProvider()
+
+token = secret_provider.get(secret_name)
+```
+
+The same goes for loading configuration from the **Parameter Store** (`SSMProvider`), **AppConfig** (`AppConfigProvider`), or a **DynamoDB** table (`DynamoDBProvider`):
+
+```python
+from aws_lambda_powertools.utilities.parameters import SSMProvider
+
+provider = SSMProvider()
+
+configuration = provider.get(key)
+```
+
+### Tracing Without Instrumentation Noise
 
 X-Ray tracing is applied via two decorators that require no additional configuration:
 
@@ -342,7 +379,7 @@ def main(event: dict, context: LambdaContext) -> dict:
 
 The `@tracer.capture_lambda_handler` decorator creates the root X-Ray segment, and `@tracer.capture_method` on Repository methods creates child subsegments — so your X-Ray service map shows handler → repository → DynamoDB as distinct, timed segments. You can see exactly where latency lives without writing a single `xray_recorder.begin_subsegment()` call.
 
-### **CloudWatch Metrics Without Custom Namespaces**
+### CloudWatch Metrics Without Custom Namespaces
 
 Most Lambda functions either skip custom metrics entirely — relying on the default Lambda service metrics — or end up with a tangled mix of `boto3` CloudWatch `put_metric_data` calls scattered across the codebase. Neither approach is great in production.Powertools solves this with the `Metrics` utility, which uses [**CloudWatch Embedded Metric Format (EMF)**](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html) to emit custom metrics as structured log lines. No `boto3` calls, no extra latency, no IAM permissions beyond what CloudWatch Logs already has.
 
@@ -350,143 +387,24 @@ Each template initializes a `Metrics` instance at module level with a shared n
 
 ```python
 from aws_lambda_powertools import Metrics
+from aws_lambda_powertools.metrics import MetricUnit
 
-metrics = Metrics(namespace=settings.metrics_namespace)
+metrics = Metrics(namespace=settings.metrics_namespace, service=settings.service_name)
 
 def process(event, context):
 	...
-	metrics.add_metric
+	metrics.add_metric(name="Processed", unit=MetricUnit.Count, value=1)
 
 @metrics.log_metrics
 def main(event: dict, context: LambdaContext) -> dict:
     return process(event, context)
 ```
 
-The `@metrics.log_metrics` decorator flushes all buffered metrics at the end of each invocation — including the automatic `ColdStart` metric. Every template applies this same decorator stack.
-
 The `@metrics.log_metrics` decorator flushes all buffered metrics at the end of each invocation as a single EMF-formatted log line — CloudWatch automatically parses it and makes those metrics available in dashboards and alarms without any additional infrastructure.
 
 **`capture_cold_start_metric=True`** is a one-liner that adds a `ColdStart` metric to every function automatically. In production, tracking cold starts per function gives you a clear signal for when to invest in provisioned concurrency — no custom instrumentation needed.
 
-**Across batch scenarios, metrics become particularly useful.** In the SQS and DynamoDB Stream templates, per-batch metrics give you operational visibility that the default Lambda metrics simply don't provide:
 
-```python
-# From templates/sqs/handler.py — per-record metrics in the SQS template
-@tracer.capture_method
-def handle_record(self, record: SQSRecord) -> None:
-    try:
-        message = SqsMessage.model_validate(record.json_body)
-        processed = ProcessedItem(id=message.id, content=message.content, status="PROCESSED")
-        self._repository.put_item(processed.model_dump())
-        logger.info("Successfully processed and stored message", extra={"messageId": message.id})
-    except Exception as exc:
-        logger.error("Failed to process SQS record", exc_info=exc)
-        raise  # Re-raise so BatchProcessor marks it as a failed item
-```
-
-This gives you a `RecordSuccess` vs `RecordFailure` ratio in CloudWatch — a far more actionable signal than the generic `Errors` metric on the Lambda function itself, which only fires if the *entire* invocation fails.
-
-**Metric dimensions** let you slice this data further. The `service` dimension is added automatically from the `Metrics` initialisation, so you can filter your CloudWatch dashboard by service name across all your Lambda functions from a single namespace.
-
-### **Combining Powertools with Pydantic: Event Parsing**
-
-One of the most useful patterns across the templates is combining Powertools' event data classes with Pydantic models for end-to-end type safety.
-
-Powertools parses the raw Lambda event into a typed object (so you're not indexing into raw dicts). Pydantic then validates and deserializes the *business payload* within that event:
-
-```python
-# From templates/api/handler.py — Powertools event resolver + Pydantic validation
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-from pydantic import ValidationError
-
-app = APIGatewayRestResolver()
-
-@app.post("/items")
-def create_item() -> Response:
-    # Powertools resolves the typed API Gateway envelope
-    body = app.current_event.json_body
-    # Pydantic validates the business payload
-    try:
-        item = Item.model_validate(body)
-    except ValidationError as exc:
-        return Response(status_code=422, content_type="application/json",
-                        body=dumps({"errors": loads(exc.json())}))
-    repository.put_item(item.model_dump())
-    return Response(status_code=201, content_type="application/json", body=dumps(item.dump()))
-```
-
-In the Bedrock Agent template, the same pattern applies via `BedrockAgentFunctionResolver` — Powertools resolves the agent event, and typed function signatures replace manual parameter extraction:
-
-```python
-# templates/agent/handler.py
-from aws_lambda_powertools import Logger, Metrics, Tracer
-from aws_lambda_powertools.event_handler import BedrockAgentFunctionResolver
-from aws_lambda_powertools.utilities.data_classes import BedrockAgentEvent
-from aws_lambda_powertools.utilities.typing import LambdaContext
-
-from templates.agent.models import Item
-from templates.agent.settings import Settings
-from templates.repository import Repository
-
-settings = Settings()  # type: ignore
-
-logger = Logger(service=settings.service_name)
-tracer = Tracer(service=settings.service_name)
-metrics = Metrics(service=settings.service_name, namespace=settings.metrics_namespace)
-
-repository = Repository(settings.table_name)
-app = BedrockAgentFunctionResolver()
-
-@tracer.capture_method
-@app.tool(name="getItem", description="Gets item details by ID")
-def get_item(item_id: str) -> dict:
-    """Retrieve an item by its ID.
-
-    Args:
-        item_id: The unique identifier of the item.
-
-    Returns:
-        The item details or an error message.
-    """
-    logger.info(f"Retrieving item {item_id}")
-    item = repository.get_item(item_id)
-    if not item:
-        return {"error": f"Item {item_id} not found"}
-    return item
-
-@tracer.capture_method
-@app.tool(name="createItem", description="Creates a new item with name and optional description")
-def create_item(item_id: str, name: str, description: str | None = None) -> dict:
-    """Create a new item.
-
-    Args:
-        item_id: Unique identifier for the item.
-        name: Name of the item.
-        description: Optional description of the item.
-
-    Returns:
-        The created item details.
-    """
-    logger.info(f"Creating item {item_id}")
-    item = Item(id=item_id, name=name, description=description)
-    repository.put_item(item.model_dump())
-    return item.model_dump(by_alias=True, exclude_none=True)
-
-@logger.inject_lambda_context
-@tracer.capture_lambda_handler
-@metrics.log_metrics
-def main(event: dict | BedrockAgentEvent, context: LambdaContext) -> dict:
-    """Lambda entry point for the Bedrock Agent handler.
-
-    Args:
-        event: The Bedrock Agent event.
-        context: The Lambda execution context.
-
-    Returns:
-        The Bedrock Agent function response.
-    """
-    return app.resolve(event, context)
-```
 
 ## Getting Started in Under 5 Minutes
 
@@ -535,8 +453,13 @@ It's production-ready for the AI-native workloads being built today.
 
 ## Contributing
 
-The repository is open source under the MIT license. Contributions are welcome — whether that's a new template scenario, improved infrastructure code, additional test coverage, or documentation improvements. The `.github` folder includes issue templates for bug reports, feature requests, and questions, as well as contributing guidelines.
+The repository is open source under the MIT license. Contributions are welcome — whether that's a new template scenario, improved infrastructure code, additional test coverage, or documentation improvements. Check out the [contributing guidelines](https://github.com/amrabed/aws-lambda-templates/blob/main/docs/CONTRIBUTING.md) to get started.
+
+## Conclusion: Focus on Business Logic, Not Infrastructure
 
 If you're building on AWS Lambda and you find yourself writing the same setup for the third time, I hope `aws-lambda-templates` saves you that time and helps you ship better, more consistent serverless code.
 
-**Repository**: [github.com/amrabed/aws-lambda-templates](http://github.com/amrabed/aws-lambda-templates)
+
+**Ready to start?** Head over to the repository and click **"Use this template"**:
+
+👉 [**github.com/amrabed/aws-lambda-templates**](https://github.com/amrabed/aws-lambda-templates)

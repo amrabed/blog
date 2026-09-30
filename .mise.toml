@@ -1,0 +1,49 @@
+[tools]
+python = "3.12"
+uv = "latest"
+
+[tasks.install]
+description = "Install dependencies with uv"
+run = "uv sync --all-groups"
+
+[tasks.dev]
+alias = ["d"]
+description = "Install all dependencies for development"
+depends = ["install"]
+
+[tasks.update]
+alias = ["u"]
+description = "Update dependencies"
+run = "uv lock --upgrade && uv sync --all-groups"
+
+[tasks.format]
+alias = ["f"]
+description = "Format code and sort imports with ruff"
+run = "uv run ruff format . && uv run ruff check --select I --fix ."
+
+[tasks.lint]
+alias = ["l"]
+description = "Run linter checks with ruff"
+run = "uv run ruff check ."
+
+[tasks.test]
+alias = ["t"]
+description = "Run dry-run publishing checks across all posts"
+run = "uv run python scripts/publisher.py --dry-run"
+
+[tasks.verify]
+alias = ["v"]
+description = "Run all verification checks"
+depends = ["format", "lint", "test"]
+
+[tasks.publish]
+description = "Publish or sync posts to Dev.to and Hashnode"
+run = "uv run python scripts/publisher.py"
+
+[tasks."publish:dry"]
+description = "Dry run publish verification for all ready posts"
+run = "uv run python scripts/publisher.py --dry-run"
+
+[tasks.convert]
+description = "Convert Medium feed or articles to posts"
+run = "uv run python scripts/convert_medium.py"

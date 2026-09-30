@@ -1,0 +1,127 @@
+# Technical Blog (`amrabed/blog`)
+
+This repository serves as the central Git-backed content hub and single source of truth for technical writing by [Amr Abed](https://github.com/amrabed). Articles written in Markdown are automatically published and synchronized to **[Dev.to](https://dev.to)** and **[Hashnode](https://hashnode.com)**.
+
+---
+
+## 📁 Repository Structure
+
+```text
+.
+├── .github/workflows/
+│   ├── publish.yml          # GitHub Actions publishing workflow (push & manual dispatch)
+│   └── verify.yml           # Verification workflow running mise run verify
+├── posts/
+│   ├── <slug>/
+│   │   ├── index.md         # Article markdown with YAML frontmatter
+│   │   ├── cover.png        # Hero / cover image
+│   │   └── images/          # Embedded screenshots, diagrams, and media
+├── scripts/
+│   ├── convert_medium.py    # Ingests Medium RSS/export -> structured post folders
+│   └── publisher.py         # Multi-platform publisher (Dev.to REST + Hashnode GraphQL v2)
+├── pyproject.toml           # PEP 621 dependencies, PEP 735 dev group, hatchling, ruff
+├── uv.lock                  # Deterministic dependency lockfile
+├── .mise.toml               # Task runner & local tool manager
+└── README.md
+
+```
+
+---
+
+## 📝 Frontmatter Schema
+
+Each article lives in `posts/<slug>/index.md` and begins with YAML frontmatter:
+
+```yaml
+---
+title: "Article Title"
+description: "Brief summary or subtitle for social cards and SEO."
+slug: "article-slug"
+date: "YYYY-MM-DD"
+cover_image: "./cover.png"
+canonical_url: "https://medium.com/capsulat/..." # Original source URL (or custom domain)
+tags:
+  - python
+  - aws
+  - serverless
+platforms:
+  devto:
+    published: false # Set to true to make live, or false for draft
+    id: null         # Automatically populated after initial sync
+    url: null        # Automatically populated after initial sync
+  hashnode:
+    published: false # Set to true to make live, or false for draft
+    id: null         # Automatically populated after initial sync
+    url: null        # Automatically populated after initial sync
+---
+```
+
+---
+
+## 🚀 Workflows & Commands
+
+We use [mise](https://mise.jdx.dev) and [uv](https://docs.astral.sh/uv/) for local tooling and task execution.
+
+### 1. Setup Environment
+```bash
+mise run dev   # or alias: mise run d
+```
+
+### 2. Verify Lint, Format & Dry-Run
+```bash
+mise run verify # or alias: mise run v
+```
+
+
+### 2. Ingest / Convert Medium Articles
+To convert an RSS feed export (`feed.xml`) into refined post directories:
+```bash
+# Preview conversion without writing files
+mise run convert -- --dry-run
+
+# Convert all items from feed.xml
+mise run convert
+
+# Convert a single item by 1-based index (e.g. item 2)
+mise run convert -- --item 2
+```
+
+### 3. Dry-Run & Verify Posts
+Simulates publishing all posts without modifying remote platforms:
+```bash
+mise run publish:dry
+# Or specify a single post:
+uv run python scripts/publisher.py --post aws-lambda-templates --dry-run
+```
+
+### 4. Publish / Sync
+```bash
+# Sync as drafts
+uv run python scripts/publisher.py --draft
+
+# Publish specific post live
+uv run python scripts/publisher.py --post aws-lambda-templates --target all
+```
+
+---
+
+## 🔑 Platform Secrets Configuration
+
+To enable automated synchronization from GitHub Actions or local CLI, configure these credentials:
+
+| Secret Name | Platform | Description | Where to Obtain |
+| :--- | :--- | :--- | :--- |
+| `DEVTO_API_KEY` | Dev.to | API Key for Dev.to REST API | Dev.to $\rightarrow$ **Settings** $\rightarrow$ **Extensions** $\rightarrow$ **DEV Community API Keys** |
+| `HASHNODE_TOKEN` | Hashnode | Personal Access Token | Hashnode $\rightarrow$ **Account Settings** $\rightarrow$ **Developer** $\rightarrow$ **Personal Access Token** |
+| `HASHNODE_PUBLICATION_ID` | Hashnode | Publication ID | Hashnode Publication Dashboard $\rightarrow$ **Settings** (found in dashboard URL or API) |
+
+Add these keys to:
+- **GitHub Repository Secrets**: `Settings` $\rightarrow$ `Secrets and variables` $\rightarrow$ `Actions`.
+- **Local Environment** (optional, for CLI testing): Export in your local shell or `.env`.
+
+---
+
+## 🌐 SEO & Canonical URLs
+
+- Every post specifies a `canonical_url` in its frontmatter.
+- When cross-posting previously published Medium articles, `canonical_url` points to the original Medium article URL. This preserves search engine ranking equity and prevents duplicate-content penalties.

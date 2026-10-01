@@ -2,7 +2,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button, Tooltip } from "@heroui/react";
 import { FaGithub, FaRss } from "react-icons/fa6";
-import ThemeToggle from "./theme-toggle";
 import { getGravatarUrl } from "@/lib/constants";
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
@@ -27,7 +26,7 @@ const navActions: NavAction[] = [
     name: "GitHub",
     href: "https://github.com/amrabed/blog",
     icon: <FaGithub className="size-4" aria-hidden="true" />,
-    className: "hover:text-slate-900 dark:hover:text-slate-100",
+    className: "hover:text-heading",
     target: "_blank",
     rel: "noopener noreferrer",
   },
@@ -35,16 +34,16 @@ const navActions: NavAction[] = [
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-white/80 dark:bg-slate-950/80 border-b border-slate-200/60 dark:border-slate-800/60 transition-colors duration-300">
+    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-background/80 border-b border-divider transition-colors duration-300">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         {/* Left: Author identity and blog title */}
         <div className="flex items-center gap-3">
           <a
             href="https://amrabed.com"
-            className="group flex items-center gap-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-primary transition-colors"
+            className="group flex items-center gap-2.5 text-sm font-medium text-foreground hover:text-primary transition-colors"
             title="Return to amrabed.com"
           >
-            <div className="relative w-8 h-8 rounded-full overflow-hidden border border-slate-300 dark:border-slate-700 group-hover:border-primary transition-colors">
+            <div className="relative w-8 h-8 rounded-full overflow-hidden border border-divider group-hover:border-primary transition-colors">
               <Image
                 src={getGravatarUrl(64)}
                 alt="Amr Abed"
@@ -54,12 +53,12 @@ export function Header() {
                 unoptimized
               />
             </div>
-            <span className="font-semibold text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors">
+            <span className="font-semibold text-heading group-hover:text-primary transition-colors">
               Amr Abed
             </span>
           </a>
 
-          <span className="text-slate-300 dark:text-slate-700">/</span>
+          <span className="text-divider">/</span>
 
           <Link
             href="/"
@@ -80,7 +79,7 @@ export function Header() {
                     size="sm"
                     isIconOnly
                     aria-label={name}
-                    className={`text-slate-500 rounded-full ${className}`}
+                    className={`text-muted rounded-full ${className}`}
                   >
                     {icon}
                   </Button>
@@ -92,8 +91,6 @@ export function Header() {
               </Tooltip.Content>
             </Tooltip>
           ))}
-
-          <ThemeToggle />
         </div>
       </div>
     </header>

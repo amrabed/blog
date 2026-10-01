@@ -50,20 +50,14 @@ const socialProfiles: SocialProfile[] = [
 
 export function Footer() {
   return (
-    <footer className="w-full bg-white dark:bg-slate-950 border-t border-slate-200/60 dark:border-slate-800/60 transition-colors duration-500 py-12 px-6 mt-16">
+    <footer className="w-full bg-background border-t border-divider transition-colors duration-300 py-12 px-6 mt-16">
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
         <div className="flex flex-col items-center md:items-start gap-1 text-center md:text-left order-2 md:order-1">
-          <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+          <p className="text-sm font-medium text-heading">
             © {new Date().getFullYear()} Amr Abed
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Built with Next.js 16, Tailwind CSS 4, and HeroUI 3 ·{" "}
-            <a
-              href="https://amrabed.com"
-              className="text-primary hover:underline"
-            >
-              amrabed.com
-            </a>
+          <p className="text-xs text-muted">
+            Built with Next.js, Tailwind CSS, and HeroUI
           </p>
         </div>
 
@@ -81,7 +75,7 @@ export function Footer() {
                     size="sm"
                     isIconOnly
                     aria-label={`${profile.name} (opens in a new tab)`}
-                    className="text-slate-500 hover:text-primary rounded-full"
+                    className="text-muted hover:text-primary rounded-full"
                   >
                     {profile.icon}
                   </Button>

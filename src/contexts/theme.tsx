@@ -54,7 +54,11 @@ function subscribe(callback: () => void) {
 }
 
 export function ThemeProvider({ children }: PropsWithChildren) {
-  const theme = useSyncExternalStore<Theme>(subscribe, getStoredTheme, () => "dark");
+  const theme = useSyncExternalStore<Theme>(
+    subscribe,
+    getStoredTheme,
+    () => "dark",
+  );
 
   const toggleTheme = useCallback(() => {
     const next: Theme = theme === "dark" ? "light" : "dark";

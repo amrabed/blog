@@ -76,7 +76,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="text-xs font-semibold text-slate-500 hover:text-primary rounded-lg -ml-2"
+            className="text-xs font-semibold text-muted hover:text-primary rounded-lg -ml-2"
           >
             ← Back to all articles
           </Button>
@@ -84,40 +84,35 @@ export default async function BlogPostPage({ params }: PageProps) {
       </div>
 
       {/* Post Header */}
-      <header className="mb-10 pb-8 border-b border-slate-200/60 dark:border-slate-800/60">
-        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-3">
+      <header className="mb-10 pb-8 border-b border-divider">
+        <div className="flex items-center gap-2 text-xs text-muted mb-3">
           <time dateTime={post.date}>{formatDate(post.date)}</time>
           <span>•</span>
           <div className="flex flex-wrap gap-1.5">
             {post.tags.map((tag) => (
-              <Chip
-                key={tag}
-                size="sm"
-                variant="soft"
-                className="text-[11px] px-1 py-0 h-6 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-none"
-              >
+              <Chip key={tag} size="sm" variant="soft" className="tag-chip">
                 #{tag}
               </Chip>
             ))}
           </div>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-tight mb-4">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-heading tracking-tight leading-tight mb-4">
           {post.title}
         </h1>
 
         {post.description && (
-          <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed font-normal">
+          <p className="text-lg text-foreground leading-relaxed font-normal">
             {post.description}
           </p>
         )}
 
         {/* Canonical Attribution Banner */}
         {post.canonical_url && (
-          <div className="mt-6 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between flex-wrap gap-2">
+          <div className="mt-6 p-3.5 rounded-xl bg-surface border border-divider text-xs text-muted flex items-center justify-between flex-wrap gap-2">
             <span>
               Originally published on{" "}
-              <strong className="text-slate-700 dark:text-slate-300">
+              <strong className="text-heading">
                 {post.canonical_url.includes("medium.com")
                   ? "Medium"
                   : "the web"}
@@ -171,8 +166,8 @@ export default async function BlogPostPage({ params }: PageProps) {
       </div>
 
       {/* Post Footer: Author Card */}
-      <footer className="mt-16 pt-8 border-t border-slate-200/60 dark:border-slate-800/60">
-        <Card className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center sm:items-start gap-4 shadow-none">
+      <footer className="mt-16 pt-8 border-t border-divider">
+        <Card className="p-6 rounded-2xl bg-surface border border-divider flex flex-col sm:flex-row items-center sm:items-start gap-4 shadow-none">
           <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-primary shrink-0">
             <Image
               src={getGravatarUrl(160)}
@@ -184,10 +179,8 @@ export default async function BlogPostPage({ params }: PageProps) {
             />
           </div>
           <div className="flex-1 text-center sm:text-left">
-            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-              Amr Abed
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-3">
+            <h3 className="text-base font-bold text-heading">Amr Abed</h3>
+            <p className="text-xs text-muted mt-1 mb-3">
               Engineering Manager & AI Architect passionate about clean code,
               serverless systems, and home automation.
             </p>
@@ -198,12 +191,12 @@ export default async function BlogPostPage({ params }: PageProps) {
               >
                 Visit amrabed.com →
               </a>
-              <span className="text-slate-300 dark:text-slate-700">•</span>
+              <span className="text-divider">•</span>
               <a
                 href="https://twitter.com/amr_abed"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-slate-500 hover:text-primary"
+                className="text-muted hover:text-primary"
               >
                 Follow on X
               </a>

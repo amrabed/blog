@@ -31,7 +31,7 @@ export function ThemeToggle({ showLabel = false }: ThemeToggleProps) {
         </Switch.Content>
       </Switch>
       {showLabel && (
-        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 min-w-16">
+        <span className="text-xs font-medium text-muted min-w-16">
           {theme === "dark" ? "Dark Mode" : "Light Mode"}
         </span>
       )}

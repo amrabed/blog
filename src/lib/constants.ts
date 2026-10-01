@@ -3,3 +3,14 @@ export const GRAVATAR_HASH =
 
 export const getGravatarUrl = (size = 200): string =>
   `https://gravatar.com/avatar/${GRAVATAR_HASH}?s=${size}`;
+
+export const getSiteUrl = (): string => {
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
+  }
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL.replace(/\/$/, "")}`;
+  }
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+  return `https://amrabed.com${basePath}`;
+};

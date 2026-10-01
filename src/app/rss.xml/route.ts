@@ -1,10 +1,11 @@
 import { getAllPosts } from "@/lib/posts";
+import { getSiteUrl } from "@/lib/constants";
 
 export const dynamic = "force-static";
 
 export async function GET() {
   const posts = getAllPosts();
-  const siteUrl = "https://amrabed.com/blog";
+  const siteUrl = getSiteUrl();
 
   const itemsXml = posts
     .map(

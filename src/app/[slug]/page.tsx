@@ -7,7 +7,7 @@ import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import { Button, Card, Chip } from "@heroui/react";
 import { getAllSlugs, getPostBySlug } from "@/lib/posts";
-import { getGravatarUrl } from "@/lib/constants";
+import { getGravatarUrl, getSiteUrl } from "@/lib/constants";
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
@@ -27,8 +27,8 @@ export async function generateMetadata({
   const post = getPostBySlug(slug);
   if (!post) return {};
 
-  const pageCanonical =
-    post.canonical_url || `https://amrabed.com/blog/${slug}`;
+  const siteUrl = getSiteUrl();
+  const pageCanonical = post.canonical_url || `${siteUrl}/${slug}`;
 
   return {
     title: post.title,
@@ -41,7 +41,7 @@ export async function generateMetadata({
       description: post.description,
       type: "article",
       publishedTime: post.date,
-      url: `https://amrabed.com/blog/${slug}`,
+      url: `${siteUrl}/${slug}`,
     },
     twitter: {
       card: "summary_large_image",

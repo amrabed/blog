@@ -4,12 +4,12 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import Providers from "./providers";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import { getGravatarUrl } from "@/lib/constants";
+import { getGravatarUrl, getSiteUrl } from "@/lib/constants";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
-const siteUrl = "https://amrabed.com";
+const siteUrl = getSiteUrl();
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 export const metadata: Metadata = {
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: `${siteUrl}${basePath}`,
+    url: siteUrl,
     title: "Amr Abed | Blog",
     description:
       "Technical articles and insights on Artificial Intelligence, Cloud Architecture, Serverless Systems, and Home Automation.",

@@ -1,50 +1,51 @@
 "use client";
 
-import React, {
+import {
   createContext,
-  ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
+  type PropsWithChildren,
 } from "react";
 
-export type ThemeContextType = {
-  theme: string;
+export type Theme = "light" | "dark";
+
+export interface ThemeContextType {
+  theme: Theme;
   toggleTheme: () => void;
-};
+}
 
 export const ThemeContext = createContext<ThemeContextType | undefined>(
   undefined,
 );
 
-export const useTheme: () => ThemeContextType = () => {
+export function useTheme(): ThemeContextType {
   const context = useContext(ThemeContext);
   if (!context) {
     throw new Error("useTheme must be used within a ThemeProvider");
   }
   return context;
-};
+}
 
-const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [theme, setTheme] = useState("dark");
+export function ThemeProvider({ children }: PropsWithChildren) {
+  const [theme, setTheme] = useState<Theme>("dark");
   const [mounted, setMounted] = useState(false);
 
-  const toggleTheme = React.useCallback(() => {
-    if (theme === "dark") {
-      setTheme("light");
-      localStorage.setItem("currentTheme", "light");
-    } else {
-      setTheme("dark");
-      localStorage.setItem("currentTheme", "dark");
-    }
-  }, [theme]);
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => {
+      const next = prev === "dark" ? "light" : "dark";
+      localStorage.setItem("currentTheme", next);
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     setMounted(true);
-    const getTheme = localStorage.getItem("currentTheme");
-    if (getTheme) {
-      setTheme(getTheme);
+    const savedTheme = localStorage.getItem("currentTheme");
+    if (savedTheme === "light" || savedTheme === "dark") {
+      setTheme(savedTheme);
     } else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
       setTheme("light");
     }
@@ -52,11 +53,7 @@ const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (mounted) {
-      if (theme === "dark") {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
+      document.documentElement.classList.toggle("dark", theme === "dark");
     }
   }, [theme, mounted]);
 
@@ -70,6 +67,6 @@ const ThemeProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </ThemeContext.Provider>
   );
-};
+}
 
 export default ThemeProvider;

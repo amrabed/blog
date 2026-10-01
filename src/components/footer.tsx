@@ -1,5 +1,3 @@
-"use client";
-
 import { Button, Tooltip } from "@heroui/react";
 import {
   FaGithub,
@@ -11,40 +9,46 @@ import {
 } from "react-icons/fa6";
 import ThemeToggle from "./theme-toggle";
 
-const socialProfiles = [
+interface SocialProfile {
+  name: string;
+  icon: React.ReactNode;
+  link: string;
+}
+
+const socialProfiles: SocialProfile[] = [
   {
     name: "LinkedIn",
-    icon: <FaLinkedinIn className="size-4" />,
+    icon: <FaLinkedinIn className="size-4" aria-hidden="true" />,
     link: "https://www.linkedin.com/in/amrabed",
   },
   {
     name: "GitHub",
-    icon: <FaGithub className="size-4" />,
+    icon: <FaGithub className="size-4" aria-hidden="true" />,
     link: "https://www.github.com/amrabed",
   },
   {
     name: "Google Scholar",
-    icon: <FaGoogleScholar className="size-4" />,
+    icon: <FaGoogleScholar className="size-4" aria-hidden="true" />,
     link: "https://scholar.google.com/citations?user=vdrgnAYAAAAJ",
   },
   {
     name: "Medium",
-    icon: <FaMedium className="size-4" />,
+    icon: <FaMedium className="size-4" aria-hidden="true" />,
     link: "https://amrabed.medium.com",
   },
   {
     name: "Stack Overflow",
-    icon: <FaStackOverflow className="size-4" />,
+    icon: <FaStackOverflow className="size-4" aria-hidden="true" />,
     link: "https://stackoverflow.com/users/2070636/amrabed",
   },
   {
     name: "X",
-    icon: <FaXTwitter className="size-4" />,
+    icon: <FaXTwitter className="size-4" aria-hidden="true" />,
     link: "https://twitter.com/amr_abed",
   },
 ];
 
-export const Footer = () => {
+export function Footer() {
   return (
     <footer className="w-full bg-white dark:bg-slate-950 border-t border-slate-200/60 dark:border-slate-800/60 transition-colors duration-500 py-12 px-6 mt-16">
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
@@ -67,18 +71,21 @@ export const Footer = () => {
           {socialProfiles.map((profile) => (
             <Tooltip key={profile.name}>
               <Tooltip.Trigger>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  isIconOnly
-                  aria-label={`${profile.name} (opens in a new tab)`}
-                  className="text-slate-500 hover:text-primary rounded-full"
-                  onPress={() =>
-                    window.open(profile.link, "_blank", "noopener,noreferrer")
-                  }
+                <a
+                  href={profile.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  {profile.icon}
-                </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    isIconOnly
+                    aria-label={`${profile.name} (opens in a new tab)`}
+                    className="text-slate-500 hover:text-primary rounded-full"
+                  >
+                    {profile.icon}
+                  </Button>
+                </a>
               </Tooltip.Trigger>
               <Tooltip.Content>
                 <Tooltip.Arrow />
@@ -94,6 +101,6 @@ export const Footer = () => {
       </div>
     </footer>
   );
-};
+}
 
 export default Footer;

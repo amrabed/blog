@@ -4,7 +4,11 @@ import { Switch } from "@heroui/react";
 import { SunIcon, MoonIcon } from "@heroicons/react/24/outline";
 import { useTheme } from "@/contexts/theme";
 
-export const ThemeToggle = ({ showLabel = false }: { showLabel?: boolean }) => {
+interface ThemeToggleProps {
+  showLabel?: boolean;
+}
+
+export function ThemeToggle({ showLabel = false }: ThemeToggleProps) {
   const { theme, toggleTheme } = useTheme();
 
   return (
@@ -18,9 +22,9 @@ export const ThemeToggle = ({ showLabel = false }: { showLabel?: boolean }) => {
           <Switch.Control className="data-[selected=true]:bg-primary">
             <Switch.Thumb className="flex items-center justify-center">
               {theme === "dark" ? (
-                <MoonIcon className="size-3 text-primary" />
+                <MoonIcon className="size-3 text-primary" aria-hidden="true" />
               ) : (
-                <SunIcon className="size-3 text-amber-500" />
+                <SunIcon className="size-3 text-amber-500" aria-hidden="true" />
               )}
             </Switch.Thumb>
           </Switch.Control>
@@ -33,6 +37,6 @@ export const ThemeToggle = ({ showLabel = false }: { showLabel?: boolean }) => {
       )}
     </div>
   );
-};
+}
 
 export default ThemeToggle;

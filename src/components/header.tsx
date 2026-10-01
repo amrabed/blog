@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
 import { Button, Tooltip } from "@heroui/react";
@@ -9,7 +7,33 @@ import { getGravatarUrl } from "@/lib/constants";
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
-export const Header = () => {
+interface NavAction {
+  name: string;
+  href: string;
+  icon: React.ReactNode;
+  className: string;
+  target?: string;
+  rel?: string;
+}
+
+const navActions: NavAction[] = [
+  {
+    name: "RSS Feed",
+    href: `${basePath}/rss.xml`,
+    icon: <FaRss className="size-4" aria-hidden="true" />,
+    className: "hover:text-amber-500",
+  },
+  {
+    name: "GitHub",
+    href: "https://github.com/amrabed/blog",
+    icon: <FaGithub className="size-4" aria-hidden="true" />,
+    className: "hover:text-slate-900 dark:hover:text-slate-100",
+    target: "_blank",
+    rel: "noopener noreferrer",
+  },
+];
+
+export function Header() {
   return (
     <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-white/80 dark:bg-slate-950/80 border-b border-slate-200/60 dark:border-slate-800/60 transition-colors duration-300">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -47,55 +71,33 @@ export const Header = () => {
 
         {/* Right: Actions, Links, and Theme Switch */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <Tooltip>
-            <Tooltip.Trigger>
-              <a href={`${basePath}/rss.xml`}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  isIconOnly
-                  aria-label="RSS Feed"
-                  className="text-slate-500 hover:text-amber-500 rounded-full"
-                >
-                  <FaRss className="size-4" />
-                </Button>
-              </a>
-            </Tooltip.Trigger>
-            <Tooltip.Content>
-              <Tooltip.Arrow />
-              RSS Feed
-            </Tooltip.Content>
-          </Tooltip>
-
-          <Tooltip>
-            <Tooltip.Trigger>
-              <a
-                href="https://github.com/amrabed/blog"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  isIconOnly
-                  aria-label="GitHub Repository"
-                  className="text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 rounded-full"
-                >
-                  <FaGithub className="size-4" />
-                </Button>
-              </a>
-            </Tooltip.Trigger>
-            <Tooltip.Content>
-              <Tooltip.Arrow />
-              GitHub
-            </Tooltip.Content>
-          </Tooltip>
+          {navActions.map(({ name, href, icon, className, target, rel }) => (
+            <Tooltip key={name}>
+              <Tooltip.Trigger>
+                <a href={href} target={target} rel={rel}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    isIconOnly
+                    aria-label={name}
+                    className={`text-slate-500 rounded-full ${className}`}
+                  >
+                    {icon}
+                  </Button>
+                </a>
+              </Tooltip.Trigger>
+              <Tooltip.Content>
+                <Tooltip.Arrow />
+                {name}
+              </Tooltip.Content>
+            </Tooltip>
+          ))}
 
           <ThemeToggle />
         </div>
       </div>
     </header>
   );
-};
+}
 
 export default Header;

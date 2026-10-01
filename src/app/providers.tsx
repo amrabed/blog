@@ -1,11 +1,8 @@
 "use client";
 
+import type { PropsWithChildren } from "react";
 import ThemeProvider from "@/contexts/theme";
 
-const Providers = ({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) => <ThemeProvider>{children}</ThemeProvider>;
-
-export default Providers;
+export default function Providers({ children }: PropsWithChildren) {
+  return <ThemeProvider>{children}</ThemeProvider>;
+}

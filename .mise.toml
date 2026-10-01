@@ -1,6 +1,6 @@
 [tools]
-node = "25.0.0"
-pnpm = "12.6.0"
+node = "25"
+pnpm = "latest"
 
 [tasks.install]
 description = "Install dependencies with pnpm"
@@ -8,29 +8,34 @@ run = "pnpm install"
 
 [tasks.dev]
 alias = ["d"]
-description = "Install dependencies"
+description = "Start Next.js development server"
 depends = ["install"]
+run = "pnpm dev"
 
-[tasks.update]
-alias = ["u"]
-description = "Update dependencies"
-run = "pnpm update"
+[tasks.build]
+alias = ["b"]
+description = "Build static site with Next.js"
+depends = ["install"]
+run = "pnpm build"
 
 [tasks.test]
 alias = ["t"]
-description = "Run dry-run publishing checks across all posts"
-run = "pnpm run publish:dry"
+description = "Dry run publish verification for all ready posts"
+depends = ["install"]
+run = "pnpm publish:dry"
 
 [tasks.verify]
 alias = ["v"]
-description = "Run all verification checks"
-depends = ["test"]
+description = "Run all verification checks (build + publish dry-run)"
+depends = ["build", "test"]
 
 [tasks.publish]
 alias = ["p"]
-description = "Publish or sync posts to Dev.to and Hashnode"
-run = "pnpm run publish:posts"
+description = "Publish or sync posts to Dev.to, Hashnode, and Medium"
+depends = ["install"]
+run = "pnpm publish:posts"
 
 [tasks."publish:dry"]
 description = "Dry run publish verification for all ready posts"
-run = "pnpm run publish:dry"
+depends = ["install"]
+run = "pnpm publish:dry"

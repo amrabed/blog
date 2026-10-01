@@ -1,0 +1,59 @@
+@import "tailwindcss";
+@import "@heroui/styles";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --color-primary: var(--heroui-primary);
+  --color-secondary: var(--heroui-secondary);
+  --color-foreground: var(--heroui-foreground);
+  --color-background: var(--heroui-background);
+  --color-divider: var(--heroui-divider);
+  --color-heading: var(--heroui-heading);
+  --color-muted: var(--heroui-muted);
+  --color-surface: var(--heroui-surface);
+}
+
+@layer base {
+  :root {
+    --heroui-primary: #4f46e5; /* colors.indigo[600] */
+    --heroui-secondary: #52525b; /* colors.zinc[600] */
+    --heroui-foreground: #475569; /* colors.slate[600] */
+    --heroui-background: #ffffff;
+    --heroui-divider: rgba(226, 232, 240, 0.8);
+    --heroui-heading: #0f172a; /* colors.slate[900] */
+    --heroui-muted: #64748b; /* colors.slate[500] */
+    --heroui-surface: #f8fafc; /* colors.slate[50] */
+    --heroui-chip-bg: #f1f5f9; /* colors.slate[100] */
+    --heroui-chip-fg: #475569; /* colors.slate[600] */
+  }
+
+  .dark {
+    --heroui-primary: #a5b4fc; /* colors.indigo[300] */
+    --heroui-secondary: #a1a1aa; /* colors.zinc[400] */
+    --heroui-foreground: #94a3b8; /* colors.slate[400] */
+    --heroui-background: #020617; /* colors.slate[950] */
+    --heroui-divider: rgba(30, 41, 59, 0.8);
+    --heroui-heading: #f1f5f9; /* colors.slate[100] */
+    --heroui-muted: #94a3b8; /* colors.slate[400] */
+    --heroui-surface: rgba(15, 23, 42, 0.4); /* colors.slate[900]/40 */
+    --heroui-chip-bg: #1e293b; /* colors.slate[800] */
+    --heroui-chip-fg: #cbd5e1; /* colors.slate[300] */
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
+  }
+}
+
+@utility tag-chip {
+  font-size: 11px;
+  padding: 0 0.25rem;
+  height: 1.5rem;
+  border-style: none;
+  background-color: var(--heroui-chip-bg);
+  color: var(--heroui-chip-fg);
+}

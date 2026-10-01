@@ -1,7 +1,7 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import matter from 'gray-matter';
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import matter from "gray-matter";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,46 +25,46 @@ interface PostFrontmatter {
     medium?: PlatformStatus;
   };
   slug?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
-const DEVTO_API_URL = 'https://dev.to/api/articles';
-const HASHNODE_API_URL = 'https://gql.hashnode.com';
+const DEVTO_API_URL = "https://dev.to/api/articles";
+const HASHNODE_API_URL = "https://gql.hashnode.com";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function parseArgs() {
   const args = process.argv.slice(2);
   const options = {
-    post: '',
-    target: 'devto',
+    post: "",
+    target: "devto",
     dryRun: false,
     draft: true,
     updateFrontmatter: true,
-    repo: 'amrabed/blog',
-    branch: 'main',
-    assetBase: '',
+    repo: "amrabed/blog",
+    branch: "main",
+    assetBase: "",
   };
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    if (arg === '--post' && i + 1 < args.length) {
+    if (arg === "--post" && i + 1 < args.length) {
       options.post = args[++i];
-    } else if (arg === '--target' && i + 1 < args.length) {
+    } else if (arg === "--target" && i + 1 < args.length) {
       options.target = args[++i];
-    } else if (arg === '--dry-run') {
+    } else if (arg === "--dry-run") {
       options.dryRun = true;
-    } else if (arg === '--draft') {
+    } else if (arg === "--draft") {
       options.draft = true;
-    } else if (arg === '--publish' || arg === '--no-draft') {
+    } else if (arg === "--publish" || arg === "--no-draft") {
       options.draft = false;
-    } else if (arg === '--no-update-frontmatter') {
+    } else if (arg === "--no-update-frontmatter") {
       options.updateFrontmatter = false;
-    } else if (arg === '--repo' && i + 1 < args.length) {
+    } else if (arg === "--repo" && i + 1 < args.length) {
       options.repo = args[++i];
-    } else if (arg === '--branch' && i + 1 < args.length) {
+    } else if (arg === "--branch" && i + 1 < args.length) {
       options.branch = args[++i];
-    } else if (arg === '--asset-base' && i + 1 < args.length) {
+    } else if (arg === "--asset-base" && i + 1 < args.length) {
       options.assetBase = args[++i];
     }
   }
@@ -74,7 +74,7 @@ function parseArgs() {
 
 function normalizeDevtoTags(tags: string[]): string[] {
   return tags
-    .map((t) => t.toLowerCase().replace(/[^a-z0-9]/g, ''))
+    .map((t) => t.toLowerCase().replace(/[^a-z0-9]/g, ""))
     .filter((t) => t.length > 0)
     .slice(0, 4);
 }
@@ -85,30 +85,32 @@ function resolveImageUrls(
   repo: string,
   branch: string,
   assetBase: string,
-  coverImage?: string
+  coverImage?: string,
 ): { resolvedContent: string; coverUrl?: string } {
   const base =
-    assetBase || `https://raw.githubusercontent.com/${repo}/${branch}/posts/${slug}`;
+    assetBase ||
+    `https://raw.githubusercontent.com/${repo}/${branch}/posts/${slug}`;
 
   // Replace relative markdown image paths: ![alt](./path) or ![alt](images/...)
   let resolved = markdown.replace(
     /!\[(.*?)\]\((?!https?:\/\/)(?:\.\/)?([^)]+)\)/g,
-    (_match, alt, imgPath) => `![${alt}](${base}/${imgPath.replace(/^\.\//, '')})`
+    (_match, alt, imgPath) =>
+      `![${alt}](${base}/${imgPath.replace(/^\.\//, "")})`,
   );
 
   // Replace HTML img src paths: <img src="./path" ...>
   resolved = resolved.replace(
     /<img\s+([^>]*?)src=["'](?!https?:\/\/)(?:\.\/)?([^"']+)["']([^>]*?)>/g,
     (_match, prefix, imgPath, suffix) =>
-      `<img ${prefix}src="${base}/${imgPath.replace(/^\.\//, '')}"${suffix}>`
+      `<img ${prefix}src="${base}/${imgPath.replace(/^\.\//, "")}"${suffix}>`,
   );
 
   let coverUrl: string | undefined;
   if (coverImage) {
-    if (coverImage.startsWith('http://') || coverImage.startsWith('https://')) {
+    if (coverImage.startsWith("http://") || coverImage.startsWith("https://")) {
       coverUrl = coverImage;
     } else {
-      const cleanPath = coverImage.replace(/^\.\//, '');
+      const cleanPath = coverImage.replace(/^\.\//, "");
       coverUrl = `${base}/${cleanPath}`;
     }
   }
@@ -124,66 +126,80 @@ async function publishToDevto(
   apiKey: string,
   draft: boolean,
   dryRun: boolean,
-  maxRetries: number = 3
+  maxRetries: number = 3,
 ) {
   const data = post.data as PostFrontmatter;
   const devtoState = data.platforms?.devto;
+  interface DevtoPayload {
+    article: {
+      title: string;
+      body_markdown: string;
+      published: boolean;
+      tags: string[];
+      canonical_url: string;
+      description: string;
+      main_image?: string;
+    };
+  }
+
   const isUpdate = Boolean(devtoState?.id);
   const articleId = devtoState?.id;
 
-  const payload: any = {
+  const payload: DevtoPayload = {
     article: {
       title: data.title,
       body_markdown: bodyMarkdown,
       published: !draft,
       tags: normalizeDevtoTags(data.tags || []),
       canonical_url: data.canonical_url || `https://amrabed.com/blog/${slug}`,
-      description: data.description || '',
+      description: data.description || "",
+      ...(coverUrl ? { main_image: coverUrl } : {}),
     },
   };
 
-  if (coverUrl) {
-    payload.article.main_image = coverUrl;
-  }
-
   if (dryRun) {
     console.log(
-      `  [Dev.to DRY RUN] ${isUpdate ? `Update article #${articleId}` : 'Create new article'}: "${data.title}" (${draft ? 'DRAFT' : 'PUBLIC'})`
+      `  [Dev.to DRY RUN] ${isUpdate ? `Update article #${articleId}` : "Create new article"}: "${data.title}" (${draft ? "DRAFT" : "PUBLIC"})`,
     );
-    console.log(`    Tags: ${payload.article.tags.join(', ')}`);
+    console.log(`    Tags: ${payload.article.tags.join(", ")}`);
     console.log(`    Canonical URL: ${payload.article.canonical_url}`);
     if (coverUrl) console.log(`    Main Image: ${coverUrl}`);
-    return { id: articleId || 123456, url: `https://dev.to/amrabed/${slug}-dry-run` };
+    return {
+      id: articleId || 123456,
+      url: `https://dev.to/amrabed/${slug}-dry-run`,
+    };
   }
 
   const endpoint = isUpdate ? `${DEVTO_API_URL}/${articleId}` : DEVTO_API_URL;
-  const method = isUpdate ? 'PUT' : 'POST';
+  const method = isUpdate ? "PUT" : "POST";
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const res = await fetch(endpoint, {
         method,
         headers: {
-          'api-key': apiKey,
-          'Content-Type': 'application/json',
+          "api-key": apiKey,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
 
       if (res.status === 429) {
-        const retryAfterHeader = res.headers.get('retry-after');
-        const waitSeconds = retryAfterHeader ? parseInt(retryAfterHeader, 10) : 30 * attempt;
+        const retryAfterHeader = res.headers.get("retry-after");
+        const waitSeconds = retryAfterHeader
+          ? parseInt(retryAfterHeader, 10)
+          : 30 * attempt;
         console.warn(
-          `  [Dev.to RATE LIMIT] Hit 429 Too Many Requests. Waiting ${waitSeconds}s before retry (attempt ${attempt}/${maxRetries})...`
+          `  [Dev.to RATE LIMIT] Hit 429 Too Many Requests. Waiting ${waitSeconds}s before retry (attempt ${attempt}/${maxRetries})...`,
         );
         await sleep(waitSeconds * 1000);
         continue;
       }
 
       if (res.ok) {
-        const json: any = await res.json();
+        const json = (await res.json()) as { id: string | number; url: string };
         console.log(
-          `  [Dev.to SUCCESS] ID: ${json.id} | Status: ${draft ? 'DRAFT' : 'PUBLIC'} | URL: ${json.url}`
+          `  [Dev.to SUCCESS] ID: ${json.id} | Status: ${draft ? "DRAFT" : "PUBLIC"} | URL: ${json.url}`,
         );
         return { id: json.id, url: json.url };
       } else {
@@ -208,29 +224,32 @@ async function publishToHashnode(
   token: string,
   publicationId: string,
   _draft: boolean,
-  dryRun: boolean
+  dryRun: boolean,
 ) {
   const data = post.data as PostFrontmatter;
   const hashnodeState = data.platforms?.hashnode;
 
   if (hashnodeState?.published && hashnodeState?.id) {
-    console.log(`  [Hashnode SKIP] Already published (ID: ${hashnodeState.id})`);
+    console.log(
+      `  [Hashnode SKIP] Already published (ID: ${hashnodeState.id})`,
+    );
     return hashnodeState;
   }
 
   const tags = (data.tags || []).map((t) => ({
-    name: t.replace(/-/g, ' '),
-    slug: t.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+    name: t.replace(/-/g, " "),
+    slug: t.toLowerCase().replace(/[^a-z0-9]/g, "-"),
   }));
 
-  const input: any = {
+  const input: Record<string, unknown> = {
     title: data.title,
-    subtitle: data.description || '',
+    subtitle: data.description || "",
     publicationId,
     contentMarkdown: bodyMarkdown,
     tags,
     slug,
-    originalArticleURL: data.canonical_url || `https://amrabed.com/blog/${slug}`,
+    originalArticleURL:
+      data.canonical_url || `https://amrabed.com/blog/${slug}`,
   };
 
   if (coverUrl) {
@@ -254,33 +273,41 @@ async function publishToHashnode(
     console.log(`    Slug: ${slug}`);
     console.log(`    Canonical URL: ${input.originalArticleURL}`);
     console.log(`    Publication ID: ${publicationId}`);
-    return { id: 'dry-run-hashnode-id', url: `https://hashnode.com/@amrabed/${slug}` };
+    return {
+      id: "dry-run-hashnode-id",
+      url: `https://hashnode.com/@amrabed/${slug}`,
+    };
   }
 
   try {
     const res = await fetch(HASHNODE_API_URL, {
-      method: 'POST',
+      method: "POST",
       headers: {
         Authorization: token,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ query, variables: { input } }),
     });
 
-    const contentType = res.headers.get('content-type') || '';
-    if (!contentType.includes('application/json')) {
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
       const text = await res.text();
-      if (res.status === 301 || text.includes('Moved Permanently')) {
+      if (res.status === 301 || text.includes("Moved Permanently")) {
         console.warn(
-          '  [Hashnode NOTICE] Hashnode API requires Hashnode Pro. Free API access has been retired.'
+          "  [Hashnode NOTICE] Hashnode API requires Hashnode Pro. Free API access has been retired.",
         );
       } else {
-        console.error(`  [Hashnode ERROR] Non-JSON response (status ${res.status}): ${text.slice(0, 200)}`);
+        console.error(
+          `  [Hashnode ERROR] Non-JSON response (status ${res.status}): ${text.slice(0, 200)}`,
+        );
       }
       return null;
     }
 
-    const json: any = await res.json();
+    const json = (await res.json()) as {
+      errors?: unknown[];
+      data?: { publishPost?: { post?: { id: string; url: string } } };
+    };
     if (json.errors && json.errors.length > 0) {
       console.error(`  [Hashnode ERROR] ${JSON.stringify(json.errors)}`);
       return null;
@@ -288,7 +315,9 @@ async function publishToHashnode(
 
     const postData = json.data?.publishPost?.post;
     if (postData) {
-      console.log(`  [Hashnode SUCCESS] ID: ${postData.id} | URL: ${postData.url}`);
+      console.log(
+        `  [Hashnode SUCCESS] ID: ${postData.id} | URL: ${postData.url}`,
+      );
       return { id: postData.id, url: postData.url };
     }
   } catch (err) {
@@ -298,8 +327,11 @@ async function publishToHashnode(
   return null;
 }
 
-async function processPost(postDir: string, options: ReturnType<typeof parseArgs>) {
-  const indexFile = path.join(postDir, 'index.md');
+async function processPost(
+  postDir: string,
+  options: ReturnType<typeof parseArgs>,
+) {
+  const indexFile = path.join(postDir, "index.md");
   const slug = path.basename(postDir);
 
   if (!fs.existsSync(indexFile)) {
@@ -307,13 +339,13 @@ async function processPost(postDir: string, options: ReturnType<typeof parseArgs
     return;
   }
 
-  const rawFile = fs.readFileSync(indexFile, 'utf-8');
+  const rawFile = fs.readFileSync(indexFile, "utf-8");
   const post = matter(rawFile);
   const data = post.data as PostFrontmatter;
 
-  console.log('\n=======================================================');
+  console.log("\n=======================================================");
   console.log(`Post: ${data.title || slug} (${slug})`);
-  console.log('=======================================================');
+  console.log("=======================================================");
 
   if (!data.platforms) data.platforms = {};
   if (!data.platforms.devto) {
@@ -332,25 +364,27 @@ async function processPost(postDir: string, options: ReturnType<typeof parseArgs
     options.repo,
     options.branch,
     options.assetBase,
-    data.cover_image
+    data.cover_image,
   );
 
   let metadataModified = false;
 
   // 1. Dev.to
-  if (options.target === 'devto' || options.target === 'all') {
+  if (options.target === "devto" || options.target === "all") {
     const devtoKey = process.env.DEVTO_API_KEY;
     if (!devtoKey && !options.dryRun) {
-      console.log('  [Dev.to SKIP] DEVTO_API_KEY environment variable not set.');
+      console.log(
+        "  [Dev.to SKIP] DEVTO_API_KEY environment variable not set.",
+      );
     } else {
       const res = await publishToDevto(
         post,
         slug,
         resolvedContent,
         coverUrl,
-        devtoKey || 'DRY_RUN_KEY',
+        devtoKey || "DRY_RUN_KEY",
         options.draft,
-        options.dryRun
+        options.dryRun,
       );
       if (res && !options.dryRun) {
         data.platforms.devto.id = res.id;
@@ -362,12 +396,12 @@ async function processPost(postDir: string, options: ReturnType<typeof parseArgs
   }
 
   // 2. Hashnode
-  if (options.target === 'hashnode' || options.target === 'all') {
+  if (options.target === "hashnode" || options.target === "all") {
     const hashnodeToken = process.env.HASHNODE_TOKEN;
     const hashnodePubId = process.env.HASHNODE_PUBLICATION_ID;
     if ((!hashnodeToken || !hashnodePubId) && !options.dryRun) {
       console.log(
-        '  [Hashnode SKIP] HASHNODE_TOKEN and/or HASHNODE_PUBLICATION_ID environment variables not set.'
+        "  [Hashnode SKIP] HASHNODE_TOKEN and/or HASHNODE_PUBLICATION_ID environment variables not set.",
       );
     } else {
       const res = await publishToHashnode(
@@ -375,10 +409,10 @@ async function processPost(postDir: string, options: ReturnType<typeof parseArgs
         slug,
         resolvedContent,
         coverUrl,
-        hashnodeToken || 'DRY_RUN_TOKEN',
-        hashnodePubId || 'DRY_RUN_PUB_ID',
+        hashnodeToken || "DRY_RUN_TOKEN",
+        hashnodePubId || "DRY_RUN_PUB_ID",
         options.draft,
-        options.dryRun
+        options.dryRun,
       );
       if (res && !options.dryRun) {
         data.platforms.hashnode.id = res.id;
@@ -391,14 +425,14 @@ async function processPost(postDir: string, options: ReturnType<typeof parseArgs
 
   if (metadataModified && options.updateFrontmatter) {
     const updated = matter.stringify(post.content, data);
-    fs.writeFileSync(indexFile, updated, 'utf-8');
+    fs.writeFileSync(indexFile, updated, "utf-8");
     console.log(`  [FRONTMATTER UPDATED] ${indexFile}`);
   }
 }
 
 async function main() {
   const options = parseArgs();
-  const postsDir = path.resolve(__dirname, '..', 'posts');
+  const postsDir = path.resolve(__dirname, "..", "posts");
 
   let postDirs: string[] = [];
   if (options.post) {
@@ -417,7 +451,7 @@ async function main() {
   }
 
   console.log(
-    `Running publisher: target='${options.target}', dry_run=${options.dryRun}, draft=${options.draft}`
+    `Running publisher: target='${options.target}', dry_run=${options.dryRun}, draft=${options.draft}`,
   );
 
   for (let i = 0; i < postDirs.length; i++) {
@@ -431,6 +465,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error('Fatal publisher error:', err);
+  console.error("Fatal publisher error:", err);
   process.exit(1);
 });

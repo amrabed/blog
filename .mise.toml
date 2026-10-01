@@ -1,36 +1,91 @@
 [tools]
-node = "25.0.0"
-pnpm = "12.6.0"
+node = "25"
+pnpm = "latest"
+
+[shell_alias]
+m = "mise run"
+i = "mise run install"
+d = "mise run dev"
+b = "mise run build"
+s = "mise run start"
+t = "mise run test"
+tc = "mise run typecheck"
+f = "mise run format"
+l = "mise run lint"
+p = "mise run publish"
+v = "mise run verify"
+
+g = "git"
+ga = "git add"
+gb = "git branch"
+gc = "git commit"
+gco = "git checkout"
+gd = "git diff"
+gl = "git log"
+gp = "git push"
+gpl = "git pull"
+gr = "git rebase"
+gs = "git status"
 
 [tasks.install]
+alias = ["i"]
 description = "Install dependencies with pnpm"
 run = "pnpm install"
 
 [tasks.dev]
 alias = ["d"]
-description = "Install dependencies"
+description = "Start Next.js development server"
 depends = ["install"]
+run = "pnpm dev"
 
-[tasks.update]
-alias = ["u"]
-description = "Update dependencies"
-run = "pnpm update"
+[tasks.build]
+alias = ["b"]
+description = "Build static site with Next.js"
+depends = ["install"]
+run = "pnpm build"
+
+[tasks.start]
+alias = ["s", "preview"]
+description = "Preview static site build locally"
+depends = ["build"]
+run = "pnpm start"
+
+[tasks.format]
+alias = ["f"]
+description = "Format code with Prettier"
+depends = ["install"]
+run = "pnpm format"
+
+[tasks.lint]
+alias = ["l"]
+description = "Lint code with ESLint"
+depends = ["install"]
+run = "pnpm lint"
+
+[tasks.typecheck]
+alias = ["tc"]
+description = "Typecheck TypeScript code"
+depends = ["install"]
+run = "pnpm typecheck"
 
 [tasks.test]
 alias = ["t"]
-description = "Run dry-run publishing checks across all posts"
-run = "pnpm run publish:dry"
+description = "Dry run publish verification for all ready posts"
+depends = ["install"]
+run = "pnpm publish:dry"
 
 [tasks.verify]
 alias = ["v"]
-description = "Run all verification checks"
-depends = ["test"]
+description = "Run all verification checks (lint + typecheck + build + publish dry-run)"
+depends = ["lint", "typecheck", "build", "test"]
 
 [tasks.publish]
 alias = ["p"]
-description = "Publish or sync posts to Dev.to and Hashnode"
-run = "pnpm run publish:posts"
+description = "Publish or sync posts to Dev.to, Hashnode, and Medium"
+depends = ["install"]
+run = "pnpm publish:posts"
 
 [tasks."publish:dry"]
 description = "Dry run publish verification for all ready posts"
-run = "pnpm run publish:dry"
+depends = ["install"]
+run = "pnpm publish:dry"

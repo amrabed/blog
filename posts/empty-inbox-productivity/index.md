@@ -1,25 +1,32 @@
 ---
-title: "Enjoy your empty inbox!"
-description: "I have had my Gmail since I got my invite back in 2004/2005 (Yes, Gmail was by invite only back then), and I have been using it as my primary email since. Only recently, I have also started shifting many of my email communications to my relatively new Outlook inbox."
-slug: "empty-inbox-productivity"
-date: "2023-06-12"
-cover_image: "./cover.png"
-canonical_url: "https://amrabed.medium.com/enjoy-your-empty-inbox-191307c6b0a7"
-tags:
-  - gmail
-  - indistractable
-  - outlook
-  - productivity
-  - time-management
+canonical_url: https://amrabed.medium.com/enjoy-your-empty-inbox-191307c6b0a7
+cover_image: ./cover.png
+date: '2023-06-12'
+description: I have had my Gmail since I got my invite back in 2004/2005 (Yes, Gmail
+  was by invite only back then), and I have been using it as my primary email since.
+  Only recently, I have also started shifting many of my email communications to my
+  relatively new Outlook inbox.
 platforms:
   devto:
-    published: false
     id: null
+    published: false
     url: null
   hashnode:
-    published: false
     id: null
+    published: false
     url: null
+  medium:
+    id: 191307c6b0a7
+    published: true
+    url: https://amrabed.medium.com/enjoy-your-empty-inbox-191307c6b0a7
+slug: empty-inbox-productivity
+tags:
+- gmail
+- indistractable
+- outlook
+- productivity
+- time-management
+title: Enjoy your empty inbox!
 ---
 
 # Enjoy your empty inbox!

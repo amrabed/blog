@@ -1,24 +1,29 @@
 ---
-title: "Stop Writing Lambda Boilerplate"
-description: "Accelerate your serverless development with production-grade Python templates for AWS Lambda, pre-wired with best practices and modern tooling."
-slug: "aws-lambda-templates"
-date: "2026-04-18"
-cover_image: "./cover.png"
-canonical_url: "https://medium.com/capsulat/stop-writing-lambda-boilerplate-7e584af5c218"
-tags:
-  - python
-  - aws
-  - serverless
-  - lambda
+canonical_url: https://medium.com/capsulat/stop-writing-lambda-boilerplate-7e584af5c218
+cover_image: ./cover.png
+date: '2026-04-18'
+description: Accelerate your serverless development with production-grade Python templates
+  for AWS Lambda, pre-wired with best practices and modern tooling.
 platforms:
   devto:
-    published: false
     id: null
+    published: false
     url: null
   hashnode:
-    published: false
     id: null
+    published: false
     url: null
+  medium:
+    id: 7e584af5c218
+    published: true
+    url: https://medium.com/capsulat/stop-writing-lambda-boilerplate-7e584af5c218
+slug: aws-lambda-templates
+tags:
+- python
+- aws
+- serverless
+- lambda
+title: Stop Writing Lambda Boilerplate
 ---
 
 # Stop Writing Lambda Boilerplate

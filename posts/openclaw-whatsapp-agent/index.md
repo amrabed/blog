@@ -1,25 +1,32 @@
 ---
-title: "Self-Host an AI Agent Using OpenClaw and WhatsApp Cloud API (2026)"
-description: "You shouldn’t need to pay a middleman just to put your AI agent on WhatsApp — yet that’s the default everyone ends up recommending. After spending days wading through scattered resources, I finally got OpenClaw talking directly to the WhatsApp Cloud API. Here’s the exact path I took."
-slug: "openclaw-whatsapp-agent"
-date: "2026-04-04"
-cover_image: "./cover.png"
-canonical_url: "https://medium.com/capsulat/self-host-openclaw-ai-agent-whatsapp-cloud-api-5a4c29bca247"
-tags:
-  - artificial-intelligence
-  - ai-agent
-  - whatsapp
-  - openclaw
-  - automation
+canonical_url: https://medium.com/capsulat/self-host-openclaw-ai-agent-whatsapp-cloud-api-5a4c29bca247
+cover_image: ./cover.png
+date: '2026-04-04'
+description: You shouldn’t need to pay a middleman just to put your AI agent on WhatsApp — yet
+  that’s the default everyone ends up recommending. After spending days wading through
+  scattered resources, I finally got OpenClaw talking directly to the WhatsApp Cloud
+  API. Here’s the exact path I took.
 platforms:
   devto:
-    published: false
     id: null
+    published: false
     url: null
   hashnode:
-    published: false
     id: null
+    published: false
     url: null
+  medium:
+    id: 5a4c29bca247
+    published: true
+    url: https://medium.com/capsulat/self-host-openclaw-ai-agent-whatsapp-cloud-api-5a4c29bca247
+slug: openclaw-whatsapp-agent
+tags:
+- artificial-intelligence
+- ai-agent
+- whatsapp
+- openclaw
+- automation
+title: Self-Host an AI Agent Using OpenClaw and WhatsApp Cloud API (2026)
 ---
 
 # Self-Host an AI Agent Using OpenClaw and WhatsApp Cloud API (2026)

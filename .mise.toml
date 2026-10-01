@@ -46,6 +46,3 @@ run = "uv run python scripts/publisher.py"
 description = "Dry run publish verification for all ready posts"
 run = "uv run python scripts/publisher.py --dry-run"
 
-[tasks.convert]
-description = "Convert Medium feed or articles to posts"
-run = "uv run python scripts/convert_medium.py"

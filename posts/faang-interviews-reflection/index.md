@@ -1,23 +1,32 @@
 ---
-title: "I recently interviewed with two FAANG companies — Here is my impression"
-description: "Let us call them Company A and Company Z. For company A, I already had an internship with them in the past, so I skipped their online assessment and went directly to one phone screening session, followed by the final round of five virtual onsite interviews. For company Z, although I had onsite interviews with them a couple of years ago, I still had to go through their online assessment, followed by their final round of four virtual onsite interviews."
-slug: "faang-interviews-reflection"
-date: "2020-09-10"
-cover_image: "./cover.png"
-canonical_url: "https://amrabed.medium.com/i-recently-interviewed-with-two-faang-companies-here-is-my-impression-d568cfb5ee81"
-tags:
-  - faang
-  - tech-companies
-  - interview
+canonical_url: https://amrabed.medium.com/i-recently-interviewed-with-two-faang-companies-here-is-my-impression-d568cfb5ee81
+cover_image: ./cover.png
+date: '2020-09-10'
+description: Let us call them Company A and Company Z. For company A, I already had
+  an internship with them in the past, so I skipped their online assessment and went
+  directly to one phone screening session, followed by the final round of five virtual
+  onsite interviews. For company Z, although I had onsite interviews with them a couple
+  of years ago, I still had to go through their online assessment, followed by their
+  final round of four virtual onsite interviews.
 platforms:
   devto:
-    published: false
     id: null
+    published: false
     url: null
   hashnode:
-    published: false
     id: null
+    published: false
     url: null
+  medium:
+    id: d568cfb5ee81
+    published: true
+    url: https://amrabed.medium.com/i-recently-interviewed-with-two-faang-companies-here-is-my-impression-d568cfb5ee81
+slug: faang-interviews-reflection
+tags:
+- faang
+- tech-companies
+- interview
+title: I recently interviewed with two FAANG companies — Here is my impression
 ---
 
 # I recently interviewed with two FAANG companies — Here is my impression

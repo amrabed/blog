@@ -17,13 +17,11 @@ This repository serves as the central Git-backed content hub and single source o
 │   │   ├── cover.png        # Hero / cover image
 │   │   └── images/          # Embedded screenshots, diagrams, and media
 ├── scripts/
-│   ├── convert_medium.py    # Ingests Medium RSS/export -> structured post folders
-│   └── publisher.py         # Multi-platform publisher (Dev.to REST + Hashnode GraphQL v2)
+│   └── publisher.py         # Multi-platform publisher (Dev.to, Hashnode, Medium)
 ├── pyproject.toml           # PEP 621 dependencies, PEP 735 dev group, hatchling, ruff
 ├── uv.lock                  # Deterministic dependency lockfile
 ├── .mise.toml               # Task runner & local tool manager
 └── README.md
-
 ```
 
 ---
@@ -39,7 +37,7 @@ description: "Brief summary or subtitle for social cards and SEO."
 slug: "article-slug"
 date: "YYYY-MM-DD"
 cover_image: "./cover.png"
-canonical_url: "https://medium.com/capsulat/..." # Original source URL (or custom domain)
+canonical_url: "https://blog.amrabed.com/..." # Source URL
 tags:
   - python
   - aws
@@ -53,8 +51,13 @@ platforms:
     published: false # Set to true to make live, or false for draft
     id: null         # Automatically populated after initial sync
     url: null        # Automatically populated after initial sync
+  medium:
+    published: false # Set to true to make live, or false for draft
+    id: null         # Automatically populated after initial sync
+    url: null        # Automatically populated after initial sync
 ---
 ```
+
 
 ---
 
@@ -89,18 +92,21 @@ mise run convert -- --item 2
 ### 3. Dry-Run & Verify Posts
 Simulates publishing all posts without modifying remote platforms:
 ```bash
-mise run publish:dry
+mise run t
 # Or specify a single post:
-uv run python scripts/publisher.py --post aws-lambda-templates --dry-run
+mise run publish -- --post aws-lambda-templates --dry-run
 ```
 
 ### 4. Publish / Sync
 ```bash
-# Sync as drafts
-uv run python scripts/publisher.py --draft
+# Sync as drafts to all platforms
+mise run publish -- --draft
 
-# Publish specific post live
-uv run python scripts/publisher.py --post aws-lambda-templates --target all
+# Publish specific post live to Medium, Dev.to, and Hashnode
+mise run publish -- --post aws-lambda-templates --target all
+
+# Publish to Medium only
+mise run publish -- --post aws-lambda-templates --target medium
 ```
 
 ---
@@ -113,11 +119,14 @@ To enable automated synchronization from GitHub Actions or local CLI, configure 
 | :--- | :--- | :--- | :--- |
 | `DEVTO_API_KEY` | Dev.to | API Key for Dev.to REST API | Dev.to $\rightarrow$ **Settings** $\rightarrow$ **Extensions** $\rightarrow$ **DEV Community API Keys** |
 | `HASHNODE_TOKEN` | Hashnode | Personal Access Token | Hashnode $\rightarrow$ **Account Settings** $\rightarrow$ **Developer** $\rightarrow$ **Personal Access Token** |
-| `HASHNODE_PUBLICATION_ID` | Hashnode | Publication ID | Hashnode Publication Dashboard $\rightarrow$ **Settings** (found in dashboard URL or API) |
+| `HASHNODE_PUBLICATION_ID` | Hashnode | 24-char Publication ObjectId | Hashnode Dashboard URL (`hashnode.com/<id>/dashboard`) |
+| `MEDIUM_TOKEN` | Medium | Medium Integration Token | Medium $\rightarrow$ **Settings** $\rightarrow$ **Security and apps** $\rightarrow$ **Integration tokens** |
+| `MEDIUM_PUBLICATION_ID` | Medium | Optional Publication ID (e.g. Capsulat) | Medium Publication Settings |
 
 Add these keys to:
 - **GitHub Repository Secrets**: `Settings` $\rightarrow$ `Secrets and variables` $\rightarrow$ `Actions`.
 - **Local Environment** (optional, for CLI testing): Export in your local shell or `.env`.
+
 
 ---
 

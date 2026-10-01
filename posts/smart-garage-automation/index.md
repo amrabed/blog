@@ -1,25 +1,33 @@
 ---
-title: "Open, Sesame! How I automated my 15-year-old garage door"
-description: "I recently moved into a house with an attached garage, for which the owner handed me a bulky remote control for the garage door. Every time I arrived or left home, I reached for the remote and made sure to be close enough to the door to open or close it. After a couple of months of doing that and parking outside my garage most of the time, I knew there must be a better way."
-slug: "smart-garage-automation"
-date: "2023-01-08"
-cover_image: "./cover.png"
-canonical_url: "https://amrabed.medium.com/open-sesame-how-i-automated-my-15-year-old-garage-door-483365c1eb51"
-tags:
-  - smart-home
-  - diy
-  - automation
-  - garage-door-opener
-  - home-assistant
+canonical_url: https://amrabed.medium.com/open-sesame-how-i-automated-my-15-year-old-garage-door-483365c1eb51
+cover_image: ./cover.png
+date: '2023-01-08'
+description: I recently moved into a house with an attached garage, for which the
+  owner handed me a bulky remote control for the garage door. Every time I arrived
+  or left home, I reached for the remote and made sure to be close enough to the door
+  to open or close it. After a couple of months of doing that and parking outside
+  my garage most of the time, I knew there must be a better way.
 platforms:
   devto:
-    published: false
     id: null
+    published: false
     url: null
   hashnode:
-    published: false
     id: null
+    published: false
     url: null
+  medium:
+    id: 483365c1eb51
+    published: true
+    url: https://amrabed.medium.com/open-sesame-how-i-automated-my-15-year-old-garage-door-483365c1eb51
+slug: smart-garage-automation
+tags:
+- smart-home
+- diy
+- automation
+- garage-door-opener
+- home-assistant
+title: Open, Sesame! How I automated my 15-year-old garage door
 ---
 
 # Open, Sesame! How I automated my 15-year-old garage door

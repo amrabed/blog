@@ -20,6 +20,7 @@ on:
           - all
           - devto
           - hashnode
+          - medium
         default: all
       draft:
         description: "Publish as draft (recommended)"
@@ -56,6 +57,9 @@ jobs:
           DEVTO_API_KEY: ${{ secrets.DEVTO_API_KEY }}
           HASHNODE_TOKEN: ${{ secrets.HASHNODE_TOKEN }}
           HASHNODE_PUBLICATION_ID: ${{ secrets.HASHNODE_PUBLICATION_ID }}
+          MEDIUM_TOKEN: ${{ secrets.MEDIUM_TOKEN }}
+          MEDIUM_PUBLICATION_ID: ${{ secrets.MEDIUM_PUBLICATION_ID }}
+
         run: |
           ARGS=""
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then

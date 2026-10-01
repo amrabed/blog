@@ -7,7 +7,6 @@ import {
   FaStackOverflow,
   FaXTwitter,
 } from "react-icons/fa6";
-import ThemeToggle from "./theme-toggle";
 
 interface SocialProfile {
   name: string;
@@ -87,10 +86,6 @@ export function Footer() {
               </Tooltip.Content>
             </Tooltip>
           ))}
-        </div>
-
-        <div className="order-3">
-          <ThemeToggle showLabel />
         </div>
       </div>
     </footer>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button, Tooltip } from "@heroui/react";
 import { FaGithub, FaRss } from "react-icons/fa6";
+import ThemeToggle from "./theme-toggle";
 import { getGravatarUrl } from "@/lib/constants";
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
@@ -91,6 +92,8 @@ export function Header() {
               </Tooltip.Content>
             </Tooltip>
           ))}
+
+          <ThemeToggle />
         </div>
       </div>
     </header>

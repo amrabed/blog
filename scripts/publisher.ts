@@ -31,13 +31,15 @@ interface PostFrontmatter {
 const DEVTO_API_URL = 'https://dev.to/api/articles';
 const HASHNODE_API_URL = 'https://gql.hashnode.com';
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 function parseArgs() {
   const args = process.argv.slice(2);
   const options = {
     post: '',
-    target: 'all',
+    target: 'devto',
     dryRun: false,
-    draft: false,
+    draft: true,
     updateFrontmatter: true,
     repo: 'amrabed/blog',
     branch: 'main',
@@ -54,6 +56,8 @@ function parseArgs() {
       options.dryRun = true;
     } else if (arg === '--draft') {
       options.draft = true;
+    } else if (arg === '--publish' || arg === '--no-draft') {
+      options.draft = false;
     } else if (arg === '--no-update-frontmatter') {
       options.updateFrontmatter = false;
     } else if (arg === '--repo' && i + 1 < args.length) {
@@ -119,7 +123,8 @@ async function publishToDevto(
   coverUrl: string | undefined,
   apiKey: string,
   draft: boolean,
-  dryRun: boolean
+  dryRun: boolean,
+  maxRetries: number = 3
 ) {
   const data = post.data as PostFrontmatter;
   const devtoState = data.platforms?.devto;
@@ -143,7 +148,7 @@ async function publishToDevto(
 
   if (dryRun) {
     console.log(
-      `  [Dev.to DRY RUN] ${isUpdate ? `Update article #${articleId}` : 'Create new article'}: "${data.title}"`
+      `  [Dev.to DRY RUN] ${isUpdate ? `Update article #${articleId}` : 'Create new article'}: "${data.title}" (${draft ? 'DRAFT' : 'PUBLIC'})`
     );
     console.log(`    Tags: ${payload.article.tags.join(', ')}`);
     console.log(`    Canonical URL: ${payload.article.canonical_url}`);
@@ -154,26 +159,42 @@ async function publishToDevto(
   const endpoint = isUpdate ? `${DEVTO_API_URL}/${articleId}` : DEVTO_API_URL;
   const method = isUpdate ? 'PUT' : 'POST';
 
-  try {
-    const res = await fetch(endpoint, {
-      method,
-      headers: {
-        'api-key': apiKey,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const res = await fetch(endpoint, {
+        method,
+        headers: {
+          'api-key': apiKey,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
 
-    if (res.ok) {
-      const json: any = await res.json();
-      console.log(`  [Dev.to SUCCESS] ID: ${json.id} | URL: ${json.url}`);
-      return { id: json.id, url: json.url };
-    } else {
-      const errorText = await res.text();
-      console.error(`  [Dev.to ERROR] Status ${res.status}: ${errorText}`);
+      if (res.status === 429) {
+        const retryAfterHeader = res.headers.get('retry-after');
+        const waitSeconds = retryAfterHeader ? parseInt(retryAfterHeader, 10) : 30 * attempt;
+        console.warn(
+          `  [Dev.to RATE LIMIT] Hit 429 Too Many Requests. Waiting ${waitSeconds}s before retry (attempt ${attempt}/${maxRetries})...`
+        );
+        await sleep(waitSeconds * 1000);
+        continue;
+      }
+
+      if (res.ok) {
+        const json: any = await res.json();
+        console.log(
+          `  [Dev.to SUCCESS] ID: ${json.id} | Status: ${draft ? 'DRAFT' : 'PUBLIC'} | URL: ${json.url}`
+        );
+        return { id: json.id, url: json.url };
+      } else {
+        const errorText = await res.text();
+        console.error(`  [Dev.to ERROR] Status ${res.status}: ${errorText}`);
+        return null;
+      }
+    } catch (err) {
+      console.error(`  [Dev.to EXCEPTION]`, err);
+      return null;
     }
-  } catch (err) {
-    console.error(`  [Dev.to EXCEPTION]`, err);
   }
 
   return null;
@@ -245,6 +266,19 @@ async function publishToHashnode(
       },
       body: JSON.stringify({ query, variables: { input } }),
     });
+
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      const text = await res.text();
+      if (res.status === 301 || text.includes('Moved Permanently')) {
+        console.warn(
+          '  [Hashnode NOTICE] Hashnode API requires Hashnode Pro. Free API access has been retired.'
+        );
+      } else {
+        console.error(`  [Hashnode ERROR] Non-JSON response (status ${res.status}): ${text.slice(0, 200)}`);
+      }
+      return null;
+    }
 
     const json: any = await res.json();
     if (json.errors && json.errors.length > 0) {
@@ -386,8 +420,13 @@ async function main() {
     `Running publisher: target='${options.target}', dry_run=${options.dryRun}, draft=${options.draft}`
   );
 
-  for (const dir of postDirs) {
+  for (let i = 0; i < postDirs.length; i++) {
+    const dir = postDirs[i];
     await processPost(dir, options);
+    // If making live network requests, pace calls to stay well within Dev.to rate limits (10 req / 30s)
+    if (!options.dryRun && i < postDirs.length - 1) {
+      await sleep(3500);
+    }
   }
 }
 

@@ -102,11 +102,11 @@ mise run publish -- --post aws-lambda-templates --dry-run
 # Sync as drafts to all platforms
 mise run publish -- --draft
 
-# Publish specific post live to Medium, Dev.to, and Hashnode
+# Publish specific post live to Dev.to and Hashnode
 mise run publish -- --post aws-lambda-templates --target all
 
-# Publish to Medium only
-mise run publish -- --post aws-lambda-templates --target medium
+# Publish to Dev.to only
+mise run publish -- --post aws-lambda-templates --target devto
 ```
 
 ---
@@ -120,8 +120,6 @@ To enable automated synchronization from GitHub Actions or local CLI, configure 
 | `DEVTO_API_KEY` | Dev.to | API Key for Dev.to REST API | Dev.to $\rightarrow$ **Settings** $\rightarrow$ **Extensions** $\rightarrow$ **DEV Community API Keys** |
 | `HASHNODE_TOKEN` | Hashnode | Personal Access Token | Hashnode $\rightarrow$ **Account Settings** $\rightarrow$ **Developer** $\rightarrow$ **Personal Access Token** |
 | `HASHNODE_PUBLICATION_ID` | Hashnode | 24-char Publication ObjectId | Hashnode Dashboard URL (`hashnode.com/<id>/dashboard`) |
-| `MEDIUM_TOKEN` | Medium | Medium Integration Token | Medium $\rightarrow$ **Settings** $\rightarrow$ **Security and apps** $\rightarrow$ **Integration tokens** |
-| `MEDIUM_PUBLICATION_ID` | Medium | Optional Publication ID (e.g. Capsulat) | Medium Publication Settings |
 
 Add these keys to:
 - **GitHub Repository Secrets**: `Settings` $\rightarrow$ `Secrets and variables` $\rightarrow$ `Actions`.

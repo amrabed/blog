@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Cross-post and sync blog posts to Dev.to, Hashnode, and Medium.
+"""Cross-post and sync blog posts from amrabed/blog to Dev.to and Hashnode.
 
 Usage:
-    python scripts/publisher.py [--post SLUG] [--target devto|hashnode|medium|all]
+    python scripts/publisher.py [--post SLUG] [--target devto|hashnode|all]
                                 [--dry-run] [--draft]
 """
 
@@ -18,7 +18,6 @@ import requests
 
 DEVTO_API_URL = "https://dev.to/api/articles"
 HASHNODE_API_URL = "https://gql.hashnode.com"
-MEDIUM_API_URL = "https://api.medium.com/v1"
 
 # Tag normalization rules for Dev.to (max 4 tags, alphanumeric only)
 DEVTO_TAG_MAP = {
@@ -61,15 +60,6 @@ def normalize_hashnode_tags(raw_tags: list[str]) -> list[dict[str, str]]:
     return tags[:5]
 
 
-def normalize_medium_tags(raw_tags: list[str]) -> list[str]:
-    tags = []
-    for tag in raw_tags:
-        clean = re.sub(r"[^a-zA-Z0-9\s-]", "", tag).strip()
-        if clean and clean not in tags:
-            tags.append(clean)
-    return tags[:5]
-
-
 def resolve_image_urls(
     markdown_content: str,
     post_slug: str,
@@ -78,6 +68,7 @@ def resolve_image_urls(
     asset_base: str | None = None,
 ) -> tuple[str, str]:
     """Resolve relative image paths to absolute URLs; return (content, cover_url)."""
+
     base = (
         asset_base
         or f"https://raw.githubusercontent.com/{repo}/{branch}/posts/{post_slug}"
@@ -127,7 +118,9 @@ def publish_to_devto(
     headers = {"api-key": api_key, "Content-Type": "application/json"}
 
     if dry_run:
-        action = f"UPDATE article ID {article_id}" if article_id else "CREATE article"
+        action = (
+            f"UPDATE article ID {article_id}" if article_id else "CREATE new article"
+        )
         print(f"  [Dev.to DRY-RUN] Would {action}:")
         print(f"    Title: {payload['article']['title']}")
         print(f"    Tags: {payload['article']['tags']}")
@@ -181,8 +174,8 @@ def publish_to_hashnode(
     canonical_url = post.metadata.get("canonical_url", "")
 
     if dry_run:
-        action = f"UPDATE post ID {article_id}" if article_id else "PUBLISH post"
-        print(f"  [Hashnode DRY-RUN] Would {action} to pub {publication_id}:")
+        action = f"UPDATE post ID {article_id}" if article_id else "PUBLISH new post"
+        print(f"  [Hashnode DRY-RUN] Would {action} to publication {publication_id}:")
         print(f"    Title: {title}")
         print(f"    Subtitle: {subtitle}")
         print(f"    Tags: {[t['name'] for t in tags]}")
@@ -252,8 +245,7 @@ def publish_to_hashnode(
         data = resp.json()
         if "errors" in data:
             print(
-                f"  [Hashnode ERROR] GraphQL errors: {data['errors']}",
-                file=sys.stderr,
+                f"  [Hashnode ERROR] GraphQL errors: {data['errors']}", file=sys.stderr
             )
             return None
 
@@ -269,100 +261,6 @@ def publish_to_hashnode(
             print(f"  [Hashnode UNEXPECTED] Response: {data}", file=sys.stderr)
     except Exception as e:
         print(f"  [Hashnode EXCEPTION] {e}", file=sys.stderr)
-
-    return None
-
-
-def publish_to_medium(
-    post: frontmatter.Post,
-    slug: str,
-    body_markdown: str,
-    cover_url: str,
-    token: str,
-    publication_id: str | None,
-    draft: bool,
-    dry_run: bool,
-) -> dict[str, Any] | None:
-    medium_meta = post.metadata.get("platforms", {}).get("medium", {})
-    article_id = medium_meta.get("id")
-
-    if article_id:
-        print(
-            f"  [Medium SKIP] Article already posted to Medium (ID: {article_id}).\n"
-            "    Note: Medium API does not support updates; edit via Medium dashboard."
-        )
-        return None
-
-    title = post.metadata.get("title", "")
-    tags = normalize_medium_tags(post.metadata.get("tags", []))
-    canonical_url = post.metadata.get("canonical_url", "")
-    is_published = False if draft else medium_meta.get("published", False)
-    publish_status = "public" if is_published else "draft"
-
-    # Prepend cover image to markdown if not already present
-    content = body_markdown
-    if "cover.png" not in content and cover_url:
-        content = f"![{title}]({cover_url})\n\n{content}"
-
-    payload = {
-        "title": title,
-        "contentFormat": "markdown",
-        "content": content,
-        "tags": tags,
-        "publishStatus": publish_status,
-    }
-    if canonical_url:
-        payload["canonicalUrl"] = canonical_url
-
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-    }
-
-    target_name = (
-        f"publication '{publication_id}'" if publication_id else "author profile"
-    )
-
-    if dry_run:
-        print(f"  [Medium DRY-RUN] Would POST to {target_name}:")
-        print(f"    Title: {title}")
-        print(f"    Tags: {tags}")
-        print(f"    Status: {publish_status}")
-        print(f"    Canonical URL: {canonical_url}")
-        return {"id": "dry_run_medium_id", "url": "https://medium.com/dry-run"}
-
-    try:
-        # Determine endpoint URL
-        if publication_id:
-            url = f"{MEDIUM_API_URL}/publications/{publication_id}/posts"
-        else:
-            # Fetch user ID first
-            me_resp = requests.get(f"{MEDIUM_API_URL}/me", headers=headers, timeout=10)
-            if me_resp.status_code != 200:
-                print(
-                    f"  [Medium ERROR] Failed to fetch user info: {me_resp.text}",
-                    file=sys.stderr,
-                )
-                return None
-            user_id = me_resp.json().get("data", {}).get("id")
-            url = f"{MEDIUM_API_URL}/users/{user_id}/posts"
-
-        print(f"  [Medium] Creating post on {target_name}...")
-        resp = requests.post(url, json=payload, headers=headers, timeout=25)
-        if resp.status_code in (200, 201):
-            data = resp.json().get("data", {})
-            pid = data.get("id")
-            purl = data.get("url")
-            print(f"  [Medium SUCCESS] ID: {pid} | URL: {purl}")
-            return data
-        else:
-            print(
-                f"  [Medium ERROR] Status {resp.status_code}: {resp.text}",
-                file=sys.stderr,
-            )
-    except Exception as e:
-        print(f"  [Medium EXCEPTION] {e}", file=sys.stderr)
 
     return None
 
@@ -400,12 +298,6 @@ def process_post(
         }
     if "hashnode" not in post.metadata["platforms"]:
         post.metadata["platforms"]["hashnode"] = {
-            "published": False,
-            "id": None,
-            "url": None,
-        }
-    if "medium" not in post.metadata["platforms"]:
-        post.metadata["platforms"]["medium"] = {
             "published": False,
             "id": None,
             "url": None,
@@ -448,6 +340,7 @@ def process_post(
                 "  [Hashnode SKIP] HASHNODE_TOKEN and/or HASHNODE_PUBLICATION_ID"
                 " environment variables not set."
             )
+
         else:
             res = publish_to_hashnode(
                 post=post,
@@ -466,30 +359,6 @@ def process_post(
                     post.metadata["platforms"]["hashnode"]["published"] = True
                 metadata_modified = True
 
-    # Medium
-    if target in ("medium", "all"):
-        medium_token = os.getenv("MEDIUM_TOKEN")
-        medium_pub_id = os.getenv("MEDIUM_PUBLICATION_ID")
-        if not medium_token and not dry_run:
-            print("  [Medium SKIP] MEDIUM_TOKEN environment variable not set.")
-        else:
-            res = publish_to_medium(
-                post=post,
-                slug=slug,
-                body_markdown=resolved_content,
-                cover_url=cover_url,
-                token=medium_token or "DRY_RUN_TOKEN",
-                publication_id=medium_pub_id,
-                draft=draft,
-                dry_run=dry_run,
-            )
-            if res and not dry_run:
-                post.metadata["platforms"]["medium"]["id"] = res.get("id")
-                post.metadata["platforms"]["medium"]["url"] = res.get("url")
-                if not draft:
-                    post.metadata["platforms"]["medium"]["published"] = True
-                metadata_modified = True
-
     if metadata_modified and update_frontmatter:
         with open(index_file, "w", encoding="utf-8") as f:
             f.write(frontmatter.dumps(post) + "\n")
@@ -498,18 +367,14 @@ def process_post(
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Cross-post blog articles to Dev.to, Hashnode, and Medium"
+        description="Cross-post blog articles to Dev.to and Hashnode"
     )
     parser.add_argument(
         "--post",
         type=str,
         help="Specific post slug to publish (e.g. aws-lambda-templates)",
     )
-    parser.add_argument(
-        "--target",
-        choices=["devto", "hashnode", "medium", "all"],
-        default="all",
-    )
+    parser.add_argument("--target", choices=["devto", "hashnode", "all"], default="all")
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -551,6 +416,7 @@ def main():
         f"Running publisher: target='{args.target}', "
         f"dry_run={args.dry_run}, draft={args.draft}"
     )
+
     for pdir in post_dirs:
         process_post(
             post_dir=pdir,

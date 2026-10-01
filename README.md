@@ -86,15 +86,16 @@ mise run publish -- --post aws-lambda-templates --dry-run
 ```
 
 ### 4. Publish / Sync
+By default, the publisher targets **Dev.to** in **draft** mode (`--draft` is default) to allow inspection before going live.
 ```bash
-# Sync as drafts to all platforms
-mise run publish -- --draft
+# Sync all posts to Dev.to as drafts (default)
+mise run publish
 
-# Publish specific post live to Dev.to and Hashnode
-mise run publish -- --post aws-lambda-templates --target all
+# Publish specific post live to Dev.to (public)
+mise run publish -- --post aws-lambda-templates --publish
 
-# Publish to Dev.to only
-mise run publish -- --post aws-lambda-templates --target devto
+# Publish to both Dev.to and Hashnode (requires Hashnode Pro)
+mise run publish -- --target all
 ```
 
 ---

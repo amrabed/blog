@@ -1,16 +1,19 @@
 ---
-canonical_url: https://amrabed.medium.com/your-ai-code-can-be-elegant-too-5aaed8b46e43
+canonical_url: 'https://amrabed.medium.com/your-ai-code-can-be-elegant-too-5aaed8b46e43'
 cover_image: ./cover.png
 date: '2024-05-19'
-description: As the Machine Learning Engineering Manager at an AI-powered SaaS company,
-  I get to peek into the machine learning (ML) code written by data scientists on
-  the team. Oh, and when I’m not doing that, I dabble in the occasional Kaggle competition — although
-  I must admit, I’m more of a casual competitor than a podium contender.
+description: >-
+  As the Machine Learning Engineering Manager at an AI-powered SaaS company, I
+  get to peek into the machine learning (ML) code written by data scientists on
+  the team. Oh, and when I’m not doing that, I dabble in the occasional Kaggle
+  competition — although I must admit, I’m more of a casual competitor than a
+  podium contender.
 platforms:
   devto:
-    id: null
+    id: 4780206
     published: false
-    url: null
+    url: >-
+      https://dev.to/amrabed/your-ai-code-can-be-elegant-too-38af-temp-slug-2577593
   hashnode:
     id: null
     published: false
@@ -18,14 +21,14 @@ platforms:
   medium:
     id: 5aaed8b46e43
     published: true
-    url: https://amrabed.medium.com/your-ai-code-can-be-elegant-too-5aaed8b46e43
+    url: 'https://amrabed.medium.com/your-ai-code-can-be-elegant-too-5aaed8b46e43'
 slug: elegant-ai-code
 tags:
-- data-science
-- machine-learning
-- mlops
-- artificial-intelligence
-- software-engineering
+  - data-science
+  - machine-learning
+  - mlops
+  - artificial-intelligence
+  - software-engineering
 title: Your AI Code Can Be Elegant Too
 ---
 

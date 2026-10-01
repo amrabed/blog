@@ -1,17 +1,15 @@
 ---
-canonical_url: https://amrabed.medium.com/open-sesame-how-i-automated-my-15-year-old-garage-door-483365c1eb51
+canonical_url: >-
+  https://amrabed.medium.com/open-sesame-how-i-automated-my-15-year-old-garage-door-483365c1eb51
 cover_image: ./cover.png
 date: '2023-01-08'
-description: I recently moved into a house with an attached garage, for which the
-  owner handed me a bulky remote control for the garage door. Every time I arrived
-  or left home, I reached for the remote and made sure to be close enough to the door
-  to open or close it. After a couple of months of doing that and parking outside
-  my garage most of the time, I knew there must be a better way.
+description: "I recently moved into a house with an attached garage, for which the owner handed me a bulky remote control for the garage door. Every time I arrived or left home, I reached for the remote and made sure to be close enough to the door to open or close it. After a couple of months of doing that and parking outside my garage most of the time, I knew there must be a better\_way."
 platforms:
   devto:
-    id: null
+    id: 4780216
     published: false
-    url: null
+    url: >-
+      https://dev.to/amrabed/open-sesame-how-i-automated-my-15-year-old-garage-door-5hh6-temp-slug-898183
   hashnode:
     id: null
     published: false
@@ -19,15 +17,16 @@ platforms:
   medium:
     id: 483365c1eb51
     published: true
-    url: https://amrabed.medium.com/open-sesame-how-i-automated-my-15-year-old-garage-door-483365c1eb51
+    url: >-
+      https://amrabed.medium.com/open-sesame-how-i-automated-my-15-year-old-garage-door-483365c1eb51
 slug: smart-garage-automation
 tags:
-- smart-home
-- diy
-- automation
-- garage-door-opener
-- home-assistant
-title: Open, Sesame! How I automated my 15-year-old garage door
+  - smart-home
+  - diy
+  - automation
+  - garage-door-opener
+  - home-assistant
+title: 'Open, Sesame! How I automated my 15-year-old garage door'
 ---
 
 # Open, Sesame! How I automated my 15-year-old garage door

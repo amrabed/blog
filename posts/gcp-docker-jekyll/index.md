@@ -1,15 +1,15 @@
 ---
-canonical_url: https://medium.com/capsulat/using-google-cloud-and-docker-to-test-your-jekyll-website-3ae5d87a4247
+canonical_url: >-
+  https://medium.com/capsulat/using-google-cloud-and-docker-to-test-your-jekyll-website-3ae5d87a4247
 cover_image: ./cover.png
 date: '2020-09-14'
-description: I am hosting my website on GitHub Pages, so I am using Jekyll to build
-  it. Whenever I update the website code, I need to test it “locally” before pushing/publishing
-  to GitHub.
+description: "I am hosting my website on GitHub Pages, so I am using Jekyll to build it. Whenever I update the website code, I need to test it “locally” before pushing/publishing to\_GitHub."
 platforms:
   devto:
-    id: null
+    id: 4780214
     published: false
-    url: null
+    url: >-
+      https://dev.to/amrabed/using-google-cloud-and-docker-to-test-your-jekyll-website-2jmm-temp-slug-8448043
   hashnode:
     id: null
     published: false
@@ -17,14 +17,15 @@ platforms:
   medium:
     id: 3ae5d87a4247
     published: true
-    url: https://medium.com/capsulat/using-google-cloud-and-docker-to-test-your-jekyll-website-3ae5d87a4247
+    url: >-
+      https://medium.com/capsulat/using-google-cloud-and-docker-to-test-your-jekyll-website-3ae5d87a4247
 slug: gcp-docker-jekyll
 tags:
-- jekyll
-- cloud
-- google
-- github
-- docker
+  - jekyll
+  - cloud
+  - google
+  - github
+  - docker
 title: Using Google Cloud and Docker to Test your Jekyll Website
 ---
 

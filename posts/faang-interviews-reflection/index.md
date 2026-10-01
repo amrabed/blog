@@ -1,18 +1,22 @@
 ---
-canonical_url: https://amrabed.medium.com/i-recently-interviewed-with-two-faang-companies-here-is-my-impression-d568cfb5ee81
+canonical_url: >-
+  https://amrabed.medium.com/i-recently-interviewed-with-two-faang-companies-here-is-my-impression-d568cfb5ee81
 cover_image: ./cover.png
 date: '2020-09-10'
-description: Let us call them Company A and Company Z. For company A, I already had
-  an internship with them in the past, so I skipped their online assessment and went
-  directly to one phone screening session, followed by the final round of five virtual
-  onsite interviews. For company Z, although I had onsite interviews with them a couple
-  of years ago, I still had to go through their online assessment, followed by their
-  final round of four virtual onsite interviews.
+description: >-
+  Let us call them Company A and Company Z. For company A, I already had an
+  internship with them in the past, so I skipped their online assessment and
+  went directly to one phone screening session, followed by the final round of
+  five virtual onsite interviews. For company Z, although I had onsite
+  interviews with them a couple of years ago, I still had to go through their
+  online assessment, followed by their final round of four virtual onsite
+  interviews.
 platforms:
   devto:
-    id: null
+    id: 4780209
     published: false
-    url: null
+    url: >-
+      https://dev.to/amrabed/i-recently-interviewed-with-two-faang-companies-here-is-my-impression-24im-temp-slug-3942277
   hashnode:
     id: null
     published: false
@@ -20,12 +24,13 @@ platforms:
   medium:
     id: d568cfb5ee81
     published: true
-    url: https://amrabed.medium.com/i-recently-interviewed-with-two-faang-companies-here-is-my-impression-d568cfb5ee81
+    url: >-
+      https://amrabed.medium.com/i-recently-interviewed-with-two-faang-companies-here-is-my-impression-d568cfb5ee81
 slug: faang-interviews-reflection
 tags:
-- faang
-- tech-companies
-- interview
+  - faang
+  - tech-companies
+  - interview
 title: I recently interviewed with two FAANG companies — Here is my impression
 ---
 

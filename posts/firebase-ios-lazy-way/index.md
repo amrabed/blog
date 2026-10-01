@@ -1,14 +1,15 @@
 ---
-canonical_url: https://medium.com/capsulat/adding-firebase-to-ios-project-the-lazy-way-94e1a41d980e
+canonical_url: >-
+  https://medium.com/capsulat/adding-firebase-to-ios-project-the-lazy-way-94e1a41d980e
 cover_image: ./cover.png
 date: '2020-09-19'
-description: 'If you are not already using CocoaPods in your project, you should start
-  by installing it using this command:'
+description: "If you are not already using CocoaPods in your project, you should start by installing it using this\_command:"
 platforms:
   devto:
-    id: null
+    id: 4780210
     published: false
-    url: null
+    url: >-
+      https://dev.to/amrabed/adding-firebase-to-ios-project-the-lazy-way-2daj-temp-slug-318870
   hashnode:
     id: null
     published: false
@@ -16,14 +17,15 @@ platforms:
   medium:
     id: 94e1a41d980e
     published: true
-    url: https://medium.com/capsulat/adding-firebase-to-ios-project-the-lazy-way-94e1a41d980e
+    url: >-
+      https://medium.com/capsulat/adding-firebase-to-ios-project-the-lazy-way-94e1a41d980e
 slug: firebase-ios-lazy-way
 tags:
-- firebase
-- ios
-- cloud
-- swift
-- mobile-app-development
+  - firebase
+  - ios
+  - cloud
+  - swift
+  - mobile-app-development
 title: Adding Firebase to iOS Project — The Lazy Way
 ---
 

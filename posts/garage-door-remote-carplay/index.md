@@ -1,17 +1,13 @@
 ---
-canonical_url: https://amrabed.medium.com/goodbye-garage-door-remote-50081b605329
+canonical_url: 'https://amrabed.medium.com/goodbye-garage-door-remote-50081b605329'
 cover_image: ./cover.png
 date: '2023-01-08'
-description: In another post, I described how I automated my 2006 garage door using
-  Home Assistant to open and close as I enter or leave my home. Here, I am building
-  on top of that to close the loop and use Apple CarPlay to open the garage door to
-  leave my garage and close it after I enter from my car screen. No need for my garage
-  door remote anymore.
+description: "In another post, I described how I automated my 2006 garage door using Home Assistant to open and close as I enter or leave my home. Here, I am building on top of that to close the loop and use Apple CarPlay to open the garage door to leave my garage and close it after I enter from my car screen. No need for my garage door remote\_anymore."
 platforms:
   devto:
-    id: null
+    id: 4780211
     published: false
-    url: null
+    url: 'https://dev.to/amrabed/goodbye-garage-door-remote-56h8-temp-slug-3931655'
   hashnode:
     id: null
     published: false
@@ -19,15 +15,15 @@ platforms:
   medium:
     id: 50081b605329
     published: true
-    url: https://amrabed.medium.com/goodbye-garage-door-remote-50081b605329
+    url: 'https://amrabed.medium.com/goodbye-garage-door-remote-50081b605329'
 slug: garage-door-remote-carplay
 tags:
-- smart-home
-- home-assistant
-- apple
-- diy
-- carplay
-title: Goodbye, garage door remote
+  - smart-home
+  - home-assistant
+  - apple
+  - diy
+  - carplay
+title: 'Goodbye, garage door remote'
 ---
 
 # Goodbye, garage door remote

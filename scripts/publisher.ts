@@ -118,6 +118,23 @@ function resolveImageUrls(
   return { resolvedContent: resolved, coverUrl };
 }
 
+function stripLeadingTitle(markdown: string, title?: string): string {
+  let cleaned = markdown.trimStart();
+  // Strip leading HTML comments if any
+  cleaned = cleaned.replace(/^<!--[\s\S]*?-->\s*/, "");
+  // Strip leading H1 that matches post title
+  if (title) {
+    const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    cleaned = cleaned.replace(
+      new RegExp(`^#\\s+${escapedTitle}\\s*\\n*`, "i"),
+      "",
+    );
+  }
+  // Generic fallback: if first line is still an H1 heading, remove it
+  cleaned = cleaned.replace(/^#\s+[^\n]+\n*/, "");
+  return cleaned.trimStart();
+}
+
 async function publishToDevto(
   post: matter.GrayMatterFile<string>,
   slug: string,
@@ -367,6 +384,8 @@ async function processPost(
     data.cover_image,
   );
 
+  const bodyMarkdown = stripLeadingTitle(resolvedContent, data.title);
+
   let metadataModified = false;
 
   // 1. Dev.to
@@ -380,7 +399,7 @@ async function processPost(
       const res = await publishToDevto(
         post,
         slug,
-        resolvedContent,
+        bodyMarkdown,
         coverUrl,
         devtoKey || "DRY_RUN_KEY",
         options.draft,
@@ -407,7 +426,7 @@ async function processPost(
       const res = await publishToHashnode(
         post,
         slug,
-        resolvedContent,
+        bodyMarkdown,
         coverUrl,
         hashnodeToken || "DRY_RUN_TOKEN",
         hashnodePubId || "DRY_RUN_PUB_ID",

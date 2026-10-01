@@ -37,6 +37,20 @@ export function getAllSlugs(): string[] {
     .map((dirent) => dirent.name);
 }
 
+function stripLeadingTitle(content: string, title?: string): string {
+  let cleaned = content.trimStart();
+  cleaned = cleaned.replace(/^<!--[\s\S]*?-->\s*/, "");
+  if (title) {
+    const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    cleaned = cleaned.replace(
+      new RegExp(`^#\\s+${escapedTitle}\\s*\\n*`, "i"),
+      "",
+    );
+  }
+  cleaned = cleaned.replace(/^#\s+[^\n]+\n*/, "");
+  return cleaned.trimStart();
+}
+
 export function getPostBySlug(slug: string): Post | null {
   const fullPath = path.join(postsDirectory, slug, "index.md");
   if (!fs.existsSync(fullPath)) return null;
@@ -55,7 +69,7 @@ export function getPostBySlug(slug: string): Post | null {
     cover_image: data.cover_image ?? null,
     tags: Array.isArray(data.tags) ? data.tags : [],
     platforms: data.platforms ?? {},
-    content,
+    content: stripLeadingTitle(content, data.title),
   };
 }
 

@@ -17,10 +17,10 @@ on:
         required: true
         type: choice
         options:
-          - all
           - devto
+          - all
           - hashnode
-        default: all
+        default: devto
       draft:
         description: "Publish as draft (recommended)"
         required: true
@@ -65,6 +65,8 @@ jobs:
             ARGS="$ARGS --target ${{ github.event.inputs.target }}"
             if [ "${{ github.event.inputs.draft }}" = "true" ]; then
               ARGS="$ARGS --draft"
+            else
+              ARGS="$ARGS --publish"
             fi
             if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
               ARGS="$ARGS --dry-run"

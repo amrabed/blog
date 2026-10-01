@@ -1,0 +1,36 @@
+[tools]
+node = "25.0.0"
+pnpm = "12.6.0"
+
+[tasks.install]
+description = "Install dependencies with pnpm"
+run = "pnpm install"
+
+[tasks.dev]
+alias = ["d"]
+description = "Install dependencies"
+depends = ["install"]
+
+[tasks.update]
+alias = ["u"]
+description = "Update dependencies"
+run = "pnpm update"
+
+[tasks.test]
+alias = ["t"]
+description = "Run dry-run publishing checks across all posts"
+run = "pnpm run publish:dry"
+
+[tasks.verify]
+alias = ["v"]
+description = "Run all verification checks"
+depends = ["test"]
+
+[tasks.publish]
+alias = ["p"]
+description = "Publish or sync posts to Dev.to and Hashnode"
+run = "pnpm run publish:posts"
+
+[tasks."publish:dry"]
+description = "Dry run publish verification for all ready posts"
+run = "pnpm run publish:dry"

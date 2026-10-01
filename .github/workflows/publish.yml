@@ -1,0 +1,86 @@
+name: Publish Posts
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "posts/**"
+  workflow_dispatch:
+    inputs:
+      post:
+        description: "Post slug to publish (e.g. aws-lambda-templates) or leave empty for all"
+        required: false
+        default: ""
+      target:
+        description: "Platform target"
+        required: true
+        type: choice
+        options:
+          - all
+          - devto
+          - hashnode
+        default: all
+      draft:
+        description: "Publish as draft (recommended)"
+        required: true
+        type: boolean
+        default: true
+      dry_run:
+        description: "Dry run (simulate without publishing)"
+        required: true
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Mise & Dependencies
+        uses: jdx/mise-action@v4
+
+      - name: Run Publisher
+        env:
+          DEVTO_API_KEY: ${{ secrets.DEVTO_API_KEY }}
+          HASHNODE_TOKEN: ${{ secrets.HASHNODE_TOKEN }}
+          HASHNODE_PUBLICATION_ID: ${{ secrets.HASHNODE_PUBLICATION_ID }}
+        run: |
+          ARGS=""
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ -n "${{ github.event.inputs.post }}" ]; then
+              ARGS="$ARGS --post ${{ github.event.inputs.post }}"
+            fi
+            ARGS="$ARGS --target ${{ github.event.inputs.target }}"
+            if [ "${{ github.event.inputs.draft }}" = "true" ]; then
+              ARGS="$ARGS --draft"
+            fi
+            if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+              ARGS="$ARGS --dry-run"
+            fi
+          fi
+          mise run publish -- $ARGS
+
+
+      - name: Commit updated article IDs & metadata
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [[ -n $(git status --porcelain posts/) ]]; then
+            git add posts/
+            git commit -m "chore: update post metadata & published IDs [skip ci]"
+            git push origin main
+          else
+            echo "No metadata changes to commit."
+          fi

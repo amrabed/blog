@@ -1,6 +1,35 @@
+---
+canonical_url: https://medium.com/capsulat/stop-writing-lambda-boilerplate-7e584af5c218
+cover_image: ./cover.png
+date: '2026-04-18'
+description: Accelerate your serverless development with production-grade Python templates
+  for AWS Lambda, pre-wired with best practices and modern tooling.
+platforms:
+  devto:
+    id: null
+    published: false
+    url: null
+  hashnode:
+    id: null
+    published: false
+    url: null
+  medium:
+    id: 7e584af5c218
+    published: true
+    url: https://medium.com/capsulat/stop-writing-lambda-boilerplate-7e584af5c218
+slug: aws-lambda-templates
+tags:
+- python
+- aws
+- serverless
+- lambda
+title: Stop Writing Lambda Boilerplate
+---
+
 # Stop Writing Lambda Boilerplate
 
 <!-- **Accelerate your serverless development with production-grade Python templates for AWS Lambda, pre-wired with best practices and modern tooling.** -->
+
 
 Introducing the [**aws-lambda-templates**](https://github.com/amrabed/aws-lambda-templates) open-source repository — a collection of production-ready Python Lambda templates for Bedrock Agent, REST API, GraphQL, DynamoDB Stream, EventBridge, S3, and SQS scenarios. These templates come pre-integrated with **AWS Lambda Powertools**, **AWS CDK**, **Pydantic**, and a robust testing infrastructure.
 
@@ -68,8 +97,11 @@ from uuid import uuid4
 from pydantic import BaseModel, Field
 from pydantic.alias_generators import to_camel
 
+
 class Item(BaseModel, alias_generator=to_camel, populate_by_name=True):
-    id: str = Field(description="Unique item identifier", default_factory=lambda: str(uuid4()))
+    id: str = Field(
+        description="Unique item identifier", default_factory=lambda: str(uuid4())
+    )
     name: str = Field(description="Human-readable item name")
 ```
 
@@ -133,10 +165,15 @@ Without Powertools, batch processing from SQS or streams requires you to manuall
 The **SQS** template uses `BatchProcessor` to handle this automatically:
 
 ```python
-from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, process_partial_response
+from aws_lambda_powertools.utilities.batch import (
+    BatchProcessor,
+    EventType,
+    process_partial_response,
+)
 from aws_lambda_powertools.utilities.batch.types import PartialItemFailureResponse
 
 processor = BatchProcessor(event_type=EventType.SQS)
+
 
 def handle_record(record) -> None:
     try:
@@ -144,6 +181,7 @@ def handle_record(record) -> None:
     except Exception as exc:
         logger.error("Failed to process record", exc_info=exc)
         raise  # Re-raise so BatchProcessor marks it as a failed item
+
 
 def main(event, context) -> PartialItemFailureResponse:
     return process_partial_response(
@@ -159,9 +197,14 @@ If `handle_record` raises for one message, `BatchProcessor` catches it, logs the
 The same pattern applies to **DynamoDB Streams**, where handling partial failures is equally critical to prevent stream stalls:
 
 ```python
-from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, process_partial_response
+from aws_lambda_powertools.utilities.batch import (
+    BatchProcessor,
+    EventType,
+    process_partial_response,
+)
 
 processor = BatchProcessor(event_type=EventType.DynamoDBStreams)
+
 
 def handle_record(record):
     try:
@@ -170,11 +213,12 @@ def handle_record(record):
         logger.error("Failed to process record", exc_info=exc)
         raise  # Re-raise so BatchProcessor marks it as a failed item
 
+
 def main(event, context):
     return process_partial_response(
-        event=event, 
+        event=event,
         record_handler=handle_record,
-        processor=processor, 
+        processor=processor,
         context=context,
     )
 ```
@@ -191,13 +235,17 @@ from aws_lambda_powertools.utilities.data_classes import BedrockAgentEvent
 
 app = BedrockAgentFunctionResolver()
 
-@app.tool(name="getItem", description="Gets item details by ID")
-def get_item(item_id: str) -> dict:
-    ...
 
-@app.tool(name="createItem", description="Creates a new item with name and optional description")
-def create_item(item_id: str, name: str, description: str | None = None) -> dict:
-    ...
+@app.tool(name="getItem", description="Gets item details by ID")
+def get_item(item_id: str) -> dict: ...
+
+
+@app.tool(
+    name="createItem",
+    description="Creates a new item with name and optional description",
+)
+def create_item(item_id: str, name: str, description: str | None = None) -> dict: ...
+
 
 def main(event: BedrockAgentEvent, context: LambdaContext) -> dict:
     """Lambda entry point for the Bedrock Agent handler"""
@@ -212,6 +260,7 @@ from aws_lambda_powertools.event_handler.api_gateway import Response
 
 app = APIGatewayRestResolver()
 
+
 @app.get("/items/<id>")
 def get_item(id: str) -> Response:
     """Retrieve an item by ID"""
@@ -219,12 +268,14 @@ def get_item(id: str) -> Response:
 
     return Response(status_code=200, content_type="application/json", body=dumps(item))
 
+
 @app.post("/items")
 def create_item() -> Response:
     """Create a new item from the request body"""
     body = app.current_event.json_body
     ...
     return Response(status_code=201, content_type="application/json", body=dumps(item))
+
 
 def main(event: dict, context: LambdaContext) -> dict:
     """Lambda entry point for the API Gateway handler"""
@@ -236,6 +287,7 @@ The **EventBridge** template uses the `event_parser` to ensure your events match
 ```python
 from aws_lambda_powertools.utilities.parser import event_parser
 from aws_lambda_powertools.utilities.parser.models import EventBridgeModel
+
 
 @event_parser(model=EventBridgeModel)
 def main(event: EventBridgeModel, context) -> None:
@@ -254,6 +306,7 @@ from pydantic import ValidationError
 
 app = APIGatewayRestResolver()
 
+
 @app.post("/items")
 def create_item() -> Response:
     # Powertools resolves the typed API Gateway envelope
@@ -262,9 +315,15 @@ def create_item() -> Response:
     try:
         item = Item.model_validate(body)
     except ValidationError as exc:
-        return Response(status_code=422, content_type="application/json", body=dumps({"error": "..."}))
+        return Response(
+            status_code=422,
+            content_type="application/json",
+            body=dumps({"error": "..."}),
+        )
     ...
-    return Response(status_code=201, content_type="application/json", body=dumps(item.dump()))
+    return Response(
+        status_code=201, content_type="application/json", body=dumps(item.dump())
+    )
 ```
 
 In the **Bedrock Agent** template, the same pattern applies via `BedrockAgentFunctionResolver` — Powertools resolves the agent event, and typed function signatures replace manual parameter extraction:
@@ -280,6 +339,7 @@ from templates.agent.models import Item
 repository = Repository(settings.table_name)
 app = BedrockAgentFunctionResolver()
 
+
 @app.tool(name="getItem", description="Gets item details by ID")
 def get_item(item_id: str) -> dict:
     item = repository.get_item(item_id)
@@ -287,11 +347,16 @@ def get_item(item_id: str) -> dict:
         return {"error": f"Item {item_id} not found"}
     return item
 
-@app.tool(name="createItem", description="Creates a new item with name and optional description")
+
+@app.tool(
+    name="createItem",
+    description="Creates a new item with name and optional description",
+)
 def create_item(item_id: str, name: str, description: str | None = None) -> dict:
     item = Item(id=item_id, name=name, description=description)
     repository.put_item(item.model_dump())
     return item.model_dump(by_alias=True, exclude_none=True)
+
 
 def main(event: BedrockAgentEvent, context: LambdaContext) -> dict:
     """Lambda entry point for the Bedrock Agent handler"""
@@ -330,6 +395,7 @@ from aws_lambda_powertools import Logger
 
 logger = Logger(service="api")
 
+
 @logger.inject_lambda_context(log_event=True)
 def handler(event: APIGatewayProxyEventV2, context: LambdaContext) -> dict:
     logger.info("Processing request", path=event.path, method=event.http_method)
@@ -362,15 +428,16 @@ from aws_lambda_powertools import Tracer
 
 tracer = Tracer(service=settings.service_name)
 
+
 # On methods — creates child subsegments in X-Ray
 @tracer.capture_method
 def handle_record(record: SQSRecord) -> None:
     repository.put_item(process(record.body))
 
+
 # On the Lambda handler — creates the root X-Ray segment
 @tracer.capture_lambda_handler
-def main(event: dict, context: LambdaContext) -> dict:
-    ...
+def main(event: dict, context: LambdaContext) -> dict: ...
 ```
 
 The `@tracer.capture_lambda_handler` decorator creates the root X-Ray segment, and `@tracer.capture_method` on Repository methods creates child subsegments — so your X-Ray service map shows handler → repository → DynamoDB as distinct, timed segments. You can see exactly where latency lives without writing a single `xray_recorder.begin_subsegment()` call.
@@ -387,9 +454,11 @@ from aws_lambda_powertools.metrics import MetricUnit
 
 metrics = Metrics(namespace=settings.metrics_namespace, service=settings.service_name)
 
+
 def process(event, context):
-	...
-	metrics.add_metric(name="Processed", unit=MetricUnit.Count, value=1)
+    ...
+    metrics.add_metric(name="Processed", unit=MetricUnit.Count, value=1)
+
 
 @metrics.log_metrics
 def main(event: dict, context: LambdaContext) -> dict:

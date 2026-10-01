@@ -1,0 +1,19 @@
+{
+  "name": "blog",
+  "version": "0.1.0",
+  "description": "Amr Abed's technical blog and multi-platform publishing engine",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "publish:posts": "tsx scripts/publisher.ts",
+    "publish:dry": "tsx scripts/publisher.ts --dry-run"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.9",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}

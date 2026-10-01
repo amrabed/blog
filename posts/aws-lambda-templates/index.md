@@ -32,7 +32,7 @@ title: Stop Writing Lambda Boilerplate
 <!-- **Accelerate your serverless development with production-grade Python templates for AWS Lambda, pre-wired with best practices and modern tooling.** -->
 
 
-Introducing the [**aws-lambda-templates**](https://github.com/amrabed/aws-lambda-templates) open-source repository — a collection of production-ready Python Lambda templates for Bedrock Agent, REST API, GraphQL, DynamoDB Stream, EventBridge, S3, and SQS scenarios. These templates come pre-integrated with **AWS Lambda Powertools**, **AWS CDK**, **Pydantic**, and a robust testing infrastructure.
+Introducing the [**cur8d/lambda**](https://github.com/cur8d/lambda) open-source repository — a collection of production-ready Python Lambda templates for Bedrock Agent, REST API, GraphQL, DynamoDB Stream, EventBridge, S3, and SQS scenarios. These templates come pre-integrated with **AWS Lambda Powertools**, **AWS CDK**, **Pydantic**, and a robust testing infrastructure.
 
 ---
 
@@ -43,7 +43,7 @@ Every serverless developer knows the feeling. You spin up a new Lambda project, 
 
 This repetitive setup isn't just tedious — it's a source of inconsistency across projects and a hidden risk. Teams often skip best practices under time pressure, and the "quick Lambda" becomes the undocumented, untested function that nobody dares touch six months later.
 
-That's why I built [**aws-lambda-templates**](https://github.com/amrabed/aws-lambda-templates) — a collection of production-ready, plug-and-play Python Lambda templates for some of the common real-world scenarios on AWS.
+That's why I built [**cur8d/lambda**](https://github.com/cur8d/lambda) — a collection of production-ready, plug-and-play Python Lambda templates for some of the common real-world scenarios on AWS.
 
 ## The Problem with Lambda Bootstrapping
 
@@ -59,9 +59,9 @@ AWS Lambda's promise is simplicity: deploy a function, it scales. But production
 
 Most developers piece this together manually each time — or worse, they copy a "good enough" version from a previous project and gradually accumulate inconsistencies.
 
-## Introducing aws-lambda-templates
+## Introducing cur8d/lambda
 
-[aws-lambda-templates](https://github.com/amrabed/aws-lambda-templates) is a GitHub template repository that gives you a complete, opinionated, production-grade starting point for Python Lambda development. It currently covers seven real-world scenarios out of the box:
+[cur8d/lambda](https://github.com/cur8d/lambda) is a GitHub template repository that gives you a complete, opinionated, production-grade starting point for Python Lambda development. It currently covers seven real-world scenarios out of the box:
 
 - **Bedrock Agent** — Handle function-based actions from Amazon Bedrock Agents
 - **GraphQL API** — Resolve AppSync GraphQL requests
@@ -522,9 +522,9 @@ The repository is open source under the MIT license. Contributions are welcome �
 
 ---
 
-If you're building on AWS Lambda and you find yourself writing the same setup for the third time, I hope `aws-lambda-templates` saves you that time and helps you ship better, more consistent serverless code.
+If you're building on AWS Lambda and you find yourself writing the same setup for the third time, I hope `cur8d/lambda` saves you that time and helps you ship better, more consistent serverless code.
 
 
 **Ready to start?** Head over to the repository and click **"Use this template"**:
 
-👉 [**github.com/amrabed/aws-lambda-templates**](https://github.com/amrabed/aws-lambda-templates)
+👉 [**github.com/cur8d/lambda**](https://github.com/cur8d/lambda)

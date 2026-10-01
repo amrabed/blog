@@ -10,7 +10,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 const siteUrl = "https://amrabed.com";
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "/blog";
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

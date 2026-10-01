@@ -7,7 +7,7 @@ import { FaGithub, FaRss } from "react-icons/fa6";
 import ThemeToggle from "./theme-toggle";
 import { getGravatarUrl } from "@/lib/constants";
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "/blog";
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 export const Header = () => {
   return (

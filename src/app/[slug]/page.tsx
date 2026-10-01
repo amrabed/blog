@@ -9,7 +9,7 @@ import { Button, Card, Chip } from "@heroui/react";
 import { getAllSlugs, getPostBySlug } from "@/lib/posts";
 import { getGravatarUrl } from "@/lib/constants";
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "/blog";
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 export async function generateStaticParams() {
   const slugs = getAllSlugs();

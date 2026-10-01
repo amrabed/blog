@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "npx serve out",
     "publish:posts": "tsx scripts/publisher.ts",
     "publish:dry": "tsx scripts/publisher.ts --dry-run"
   },

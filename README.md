@@ -88,44 +88,72 @@ platforms:
 
 ## 🚀 Workflows & Commands
 
-We use [mise](https://mise.jdx.dev) and [pnpm](https://pnpm.io) for local tooling and task execution.
+We use [mise](https://mise.jdx.dev) and [pnpm](https://pnpm.io) for local tooling and task execution. One-letter task and Git shell aliases are automatically active in your shell:
+
+#### Task Aliases
+| Alias | Command | Description |
+| :---: | :--- | :--- |
+| `i` | `mise run install` | Install dependencies with pnpm |
+| `d` | `mise run dev` | Start Next.js development server |
+| `b` | `mise run build` | Build static export into `out/` |
+| `s` | `mise run start` | Preview static export at `http://localhost:3000/` |
+| `t` | `mise run test` | Dry-run publish verification |
+| `v` | `mise run verify` | Run all checks (build + publish dry-run) |
+| `p` | `mise run publish` | Publish or sync posts |
+| `m` | `mise run` | Quick prefix to run any mise task |
+
+#### Git Aliases
+| Alias | Command | Alias | Command |
+| :---: | :--- | :---: | :--- |
+| `g` | `git` | `gd` | `git diff` |
+| `gs` | `git status` | `gl` | `git log` |
+| `ga` | `git add` | `gp` | `git push` |
+| `gc` | `git commit` | `gpl` | `git pull` |
+| `gb` | `git branch` | `gr` | `git rebase` |
+| `gco` | `git checkout` | | |
 
 ### 1. Start Local Development Server
 ```bash
-mise run dev   # or alias: mise run d
+d              # or: mise run dev / mise run d
 ```
-Opens the blog locally at `http://localhost:3000/blog/`.
+Opens the blog locally at `http://localhost:3000/`.
 
 ### 2. Build Static Site
 ```bash
-mise run build # or alias: mise run b
+b              # or: mise run build / mise run b
 ```
 Runs `next build` and statically exports the site into `out/`.
 
-### 3. Verify Checks (Build + Dry-Run)
+### 3. Preview Static Site Locally
 ```bash
-mise run verify # or alias: mise run v
+s              # or: mise run start / mise run s / pnpm start
+```
+Starts local static server for `out/` at `http://localhost:3000/`.
+
+### 4. Verify Checks (Build + Dry-Run)
+```bash
+v              # or: mise run verify / mise run v
 ```
 
-### 4. Dry-Run & Test Publishing
+### 5. Dry-Run & Test Publishing
 Simulates cross-posting without modifying remote platforms:
 ```bash
-mise run publish:dry
+t              # or: mise run test / mise run publish:dry
 # Or test a specific post:
 pnpm tsx scripts/publisher.ts --post aws-lambda-templates --dry-run
 ```
 
-### 5. Publish / Sync Posts
+### 6. Publish / Sync Posts
 By default, the publisher targets **Dev.to** in **draft** mode (`--draft` is default) to allow inspection before going live.
 ```bash
 # Sync all posts to Dev.to as drafts (default)
-mise run publish
+p              # or: mise run publish
 
 # Publish specific post live to Dev.to (public)
-mise run publish -- --post aws-lambda-templates --publish
+p --post aws-lambda-templates --publish
 
 # Publish to both Dev.to and Hashnode (requires Hashnode Pro)
-mise run publish -- --target all
+p --target all
 ```
 
 ---

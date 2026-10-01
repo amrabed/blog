@@ -2,7 +2,30 @@
 node = "25"
 pnpm = "latest"
 
+[shell_alias]
+m = "mise run"
+i = "mise run install"
+d = "mise run dev"
+b = "mise run build"
+s = "mise run start"
+t = "mise run test"
+p = "mise run publish"
+v = "mise run verify"
+
+g = "git"
+ga = "git add"
+gb = "git branch"
+gc = "git commit"
+gco = "git checkout"
+gd = "git diff"
+gl = "git log"
+gp = "git push"
+gpl = "git pull"
+gr = "git rebase"
+gs = "git status"
+
 [tasks.install]
+alias = ["i"]
 description = "Install dependencies with pnpm"
 run = "pnpm install"
 
@@ -17,6 +40,12 @@ alias = ["b"]
 description = "Build static site with Next.js"
 depends = ["install"]
 run = "pnpm build"
+
+[tasks.start]
+alias = ["s", "preview"]
+description = "Preview static site build locally"
+depends = ["build"]
+run = "pnpm start"
 
 [tasks.test]
 alias = ["t"]

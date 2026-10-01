@@ -1,4 +1,4 @@
-name: Deploy Blog to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -26,6 +26,8 @@ jobs:
         uses: jdx/mise-action@v4
 
       - name: Build Next.js Site
+        env:
+          NEXT_PUBLIC_BASE_PATH: /blog
         run: mise run build
 
       - name: Upload Pages Artifact

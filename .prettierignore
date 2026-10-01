@@ -1,0 +1,17 @@
+# Package managers
+pnpm-lock.yaml
+
+# Build & generated output
+.next/
+out/
+dist/
+public/
+*.tsbuildinfo
+
+# Cache & virtual env
+.venv/
+.ruff_cache/
+__pycache__/
+
+# Content / Markdown posts
+posts/

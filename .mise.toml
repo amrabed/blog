@@ -9,6 +9,9 @@ d = "mise run dev"
 b = "mise run build"
 s = "mise run start"
 t = "mise run test"
+tc = "mise run typecheck"
+f = "mise run format"
+l = "mise run lint"
 p = "mise run publish"
 v = "mise run verify"
 
@@ -47,6 +50,24 @@ description = "Preview static site build locally"
 depends = ["build"]
 run = "pnpm start"
 
+[tasks.format]
+alias = ["f"]
+description = "Format code with Prettier"
+depends = ["install"]
+run = "pnpm format"
+
+[tasks.lint]
+alias = ["l"]
+description = "Lint code with ESLint"
+depends = ["install"]
+run = "pnpm lint"
+
+[tasks.typecheck]
+alias = ["tc"]
+description = "Typecheck TypeScript code"
+depends = ["install"]
+run = "pnpm typecheck"
+
 [tasks.test]
 alias = ["t"]
 description = "Dry run publish verification for all ready posts"
@@ -55,8 +76,8 @@ run = "pnpm publish:dry"
 
 [tasks.verify]
 alias = ["v"]
-description = "Run all verification checks (build + publish dry-run)"
-depends = ["build", "test"]
+description = "Run all verification checks (lint + typecheck + build + publish dry-run)"
+depends = ["lint", "typecheck", "build", "test"]
 
 [tasks.publish]
 alias = ["p"]

@@ -155,6 +155,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                 resolved = `${basePath}/posts/${slug}/${srcString.replace(/^\.\//, "")}`;
               }
               return (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={resolved}
                   alt={alt || ""}

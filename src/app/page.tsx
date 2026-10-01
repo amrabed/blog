@@ -26,7 +26,8 @@ export default function BlogIndexPage() {
               Articles & Essays
             </h1>
             <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl">
-              Thoughts on Artificial Intelligence, Cloud Architecture, Engineering Leadership, and Smart Automation.
+              Thoughts on Artificial Intelligence, Cloud Architecture,
+              Engineering Leadership, and Smart Automation.
             </p>
           </div>
 

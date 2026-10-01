@@ -6,7 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
   type PropsWithChildren,
 } from "react";
 
@@ -29,33 +29,42 @@ export function useTheme(): ThemeContextType {
   return context;
 }
 
+function getSystemTheme(): Theme {
+  return typeof window !== "undefined" &&
+    window.matchMedia("(prefers-color-scheme: light)").matches
+    ? "light"
+    : "dark";
+}
+
+function getStoredTheme(): Theme {
+  if (typeof window === "undefined") return "dark";
+  const stored = localStorage.getItem("currentTheme");
+  if (stored === "light" || stored === "dark") return stored;
+  return getSystemTheme();
+}
+
+function subscribe(callback: () => void) {
+  window.addEventListener("storage", callback);
+  const media = window.matchMedia("(prefers-color-scheme: light)");
+  media.addEventListener("change", callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    media.removeEventListener("change", callback);
+  };
+}
+
 export function ThemeProvider({ children }: PropsWithChildren) {
-  const [theme, setTheme] = useState<Theme>("dark");
-  const [mounted, setMounted] = useState(false);
+  const theme = useSyncExternalStore<Theme>(subscribe, getStoredTheme, () => "dark");
 
   const toggleTheme = useCallback(() => {
-    setTheme((prev) => {
-      const next = prev === "dark" ? "light" : "dark";
-      localStorage.setItem("currentTheme", next);
-      return next;
-    });
-  }, []);
+    const next: Theme = theme === "dark" ? "light" : "dark";
+    localStorage.setItem("currentTheme", next);
+    window.dispatchEvent(new Event("storage"));
+  }, [theme]);
 
   useEffect(() => {
-    setMounted(true);
-    const savedTheme = localStorage.getItem("currentTheme");
-    if (savedTheme === "light" || savedTheme === "dark") {
-      setTheme(savedTheme);
-    } else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
-      setTheme("light");
-    }
-  }, []);
-
-  useEffect(() => {
-    if (mounted) {
-      document.documentElement.classList.toggle("dark", theme === "dark");
-    }
-  }, [theme, mounted]);
+    document.documentElement.classList.toggle("dark", theme === "dark");
+  }, [theme]);
 
   const contextValue = useMemo(
     () => ({ theme, toggleTheme }),

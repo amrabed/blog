@@ -48,7 +48,9 @@ export function getPostBySlug(slug: string): Post | null {
     title: data.title ?? slug,
     description: data.description ?? "",
     slug: data.slug ?? slug,
-    date: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
+    date: data.date
+      ? new Date(data.date).toISOString()
+      : new Date().toISOString(),
     canonical_url: data.canonical_url ?? null,
     cover_image: data.cover_image ?? null,
     tags: Array.isArray(data.tags) ? data.tags : [],

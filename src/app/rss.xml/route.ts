@@ -15,7 +15,7 @@ export async function GET() {
       <guid>${siteUrl}/${post.slug}/</guid>
       <pubDate>${new Date(post.date).toUTCString()}</pubDate>
       <description><![CDATA[${post.description}]]></description>
-    </item>`
+    </item>`,
     )
     .join("\n");
 

@@ -1,5 +1,5 @@
 [tools]
-python = "3.12"
+python = "3.14"
 uv = "latest"
 
 [tasks.install]
@@ -37,8 +37,10 @@ description = "Run all verification checks"
 depends = ["format", "lint", "test"]
 
 [tasks.publish]
+alias = ["p"]
 description = "Publish or sync posts to Dev.to and Hashnode"
 run = "uv run python scripts/publisher.py"
+
 
 [tasks."publish:dry"]
 description = "Dry run publish verification for all ready posts"

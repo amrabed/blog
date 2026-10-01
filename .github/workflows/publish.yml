@@ -44,7 +44,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -70,7 +70,8 @@ jobs:
               ARGS="$ARGS --dry-run"
             fi
           fi
-          uv run python scripts/publisher.py $ARGS
+          mise run publish -- $ARGS
+
 
       - name: Commit updated article IDs & metadata
         run: |

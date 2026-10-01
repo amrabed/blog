@@ -3,7 +3,7 @@ name = "blog"
 version = "0.1.0"
 description = "Git-backed content hub and cross-posting automation for Dev.to and Hashnode"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 authors = [
     { name = "Amr Abed", email = "amraabed@gmail.com" }
 ]
@@ -35,7 +35,8 @@ packages = ["scripts"]
 
 [tool.ruff]
 line-length = 88
-target-version = "py312"
+target-version = "py314"
+
 extend-exclude = ["uv.lock", ".venv"]
 
 [tool.ruff.lint]

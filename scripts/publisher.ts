@@ -1,0 +1,397 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import matter from 'gray-matter';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+interface PlatformStatus {
+  published: boolean;
+  id: string | number | null;
+  url: string | null;
+}
+
+interface PostFrontmatter {
+  title: string;
+  description?: string;
+  date?: string;
+  canonical_url?: string | null;
+  cover_image?: string;
+  tags?: string[];
+  platforms?: {
+    devto?: PlatformStatus;
+    hashnode?: PlatformStatus;
+    medium?: PlatformStatus;
+  };
+  slug?: string;
+  [key: string]: any;
+}
+
+const DEVTO_API_URL = 'https://dev.to/api/articles';
+const HASHNODE_API_URL = 'https://gql.hashnode.com';
+
+function parseArgs() {
+  const args = process.argv.slice(2);
+  const options = {
+    post: '',
+    target: 'all',
+    dryRun: false,
+    draft: false,
+    updateFrontmatter: true,
+    repo: 'amrabed/blog',
+    branch: 'main',
+    assetBase: '',
+  };
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === '--post' && i + 1 < args.length) {
+      options.post = args[++i];
+    } else if (arg === '--target' && i + 1 < args.length) {
+      options.target = args[++i];
+    } else if (arg === '--dry-run') {
+      options.dryRun = true;
+    } else if (arg === '--draft') {
+      options.draft = true;
+    } else if (arg === '--no-update-frontmatter') {
+      options.updateFrontmatter = false;
+    } else if (arg === '--repo' && i + 1 < args.length) {
+      options.repo = args[++i];
+    } else if (arg === '--branch' && i + 1 < args.length) {
+      options.branch = args[++i];
+    } else if (arg === '--asset-base' && i + 1 < args.length) {
+      options.assetBase = args[++i];
+    }
+  }
+
+  return options;
+}
+
+function normalizeDevtoTags(tags: string[]): string[] {
+  return tags
+    .map((t) => t.toLowerCase().replace(/[^a-z0-9]/g, ''))
+    .filter((t) => t.length > 0)
+    .slice(0, 4);
+}
+
+function resolveImageUrls(
+  markdown: string,
+  slug: string,
+  repo: string,
+  branch: string,
+  assetBase: string,
+  coverImage?: string
+): { resolvedContent: string; coverUrl?: string } {
+  const base =
+    assetBase || `https://raw.githubusercontent.com/${repo}/${branch}/posts/${slug}`;
+
+  // Replace relative markdown image paths: ![alt](./path) or ![alt](images/...)
+  let resolved = markdown.replace(
+    /!\[(.*?)\]\((?!https?:\/\/)(?:\.\/)?([^)]+)\)/g,
+    (_match, alt, imgPath) => `![${alt}](${base}/${imgPath.replace(/^\.\//, '')})`
+  );
+
+  // Replace HTML img src paths: <img src="./path" ...>
+  resolved = resolved.replace(
+    /<img\s+([^>]*?)src=["'](?!https?:\/\/)(?:\.\/)?([^"']+)["']([^>]*?)>/g,
+    (_match, prefix, imgPath, suffix) =>
+      `<img ${prefix}src="${base}/${imgPath.replace(/^\.\//, '')}"${suffix}>`
+  );
+
+  let coverUrl: string | undefined;
+  if (coverImage) {
+    if (coverImage.startsWith('http://') || coverImage.startsWith('https://')) {
+      coverUrl = coverImage;
+    } else {
+      const cleanPath = coverImage.replace(/^\.\//, '');
+      coverUrl = `${base}/${cleanPath}`;
+    }
+  }
+
+  return { resolvedContent: resolved, coverUrl };
+}
+
+async function publishToDevto(
+  post: matter.GrayMatterFile<string>,
+  slug: string,
+  bodyMarkdown: string,
+  coverUrl: string | undefined,
+  apiKey: string,
+  draft: boolean,
+  dryRun: boolean
+) {
+  const data = post.data as PostFrontmatter;
+  const devtoState = data.platforms?.devto;
+  const isUpdate = Boolean(devtoState?.id);
+  const articleId = devtoState?.id;
+
+  const payload: any = {
+    article: {
+      title: data.title,
+      body_markdown: bodyMarkdown,
+      published: !draft,
+      tags: normalizeDevtoTags(data.tags || []),
+      canonical_url: data.canonical_url || `https://amrabed.com/blog/${slug}`,
+      description: data.description || '',
+    },
+  };
+
+  if (coverUrl) {
+    payload.article.main_image = coverUrl;
+  }
+
+  if (dryRun) {
+    console.log(
+      `  [Dev.to DRY RUN] ${isUpdate ? `Update article #${articleId}` : 'Create new article'}: "${data.title}"`
+    );
+    console.log(`    Tags: ${payload.article.tags.join(', ')}`);
+    console.log(`    Canonical URL: ${payload.article.canonical_url}`);
+    if (coverUrl) console.log(`    Main Image: ${coverUrl}`);
+    return { id: articleId || 123456, url: `https://dev.to/amrabed/${slug}-dry-run` };
+  }
+
+  const endpoint = isUpdate ? `${DEVTO_API_URL}/${articleId}` : DEVTO_API_URL;
+  const method = isUpdate ? 'PUT' : 'POST';
+
+  try {
+    const res = await fetch(endpoint, {
+      method,
+      headers: {
+        'api-key': apiKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      const json: any = await res.json();
+      console.log(`  [Dev.to SUCCESS] ID: ${json.id} | URL: ${json.url}`);
+      return { id: json.id, url: json.url };
+    } else {
+      const errorText = await res.text();
+      console.error(`  [Dev.to ERROR] Status ${res.status}: ${errorText}`);
+    }
+  } catch (err) {
+    console.error(`  [Dev.to EXCEPTION]`, err);
+  }
+
+  return null;
+}
+
+async function publishToHashnode(
+  post: matter.GrayMatterFile<string>,
+  slug: string,
+  bodyMarkdown: string,
+  coverUrl: string | undefined,
+  token: string,
+  publicationId: string,
+  _draft: boolean,
+  dryRun: boolean
+) {
+  const data = post.data as PostFrontmatter;
+  const hashnodeState = data.platforms?.hashnode;
+
+  if (hashnodeState?.published && hashnodeState?.id) {
+    console.log(`  [Hashnode SKIP] Already published (ID: ${hashnodeState.id})`);
+    return hashnodeState;
+  }
+
+  const tags = (data.tags || []).map((t) => ({
+    name: t.replace(/-/g, ' '),
+    slug: t.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+  }));
+
+  const input: any = {
+    title: data.title,
+    subtitle: data.description || '',
+    publicationId,
+    contentMarkdown: bodyMarkdown,
+    tags,
+    slug,
+    originalArticleURL: data.canonical_url || `https://amrabed.com/blog/${slug}`,
+  };
+
+  if (coverUrl) {
+    input.coverImageOptions = { coverImageURL: coverUrl };
+  }
+
+  const query = `
+    mutation PublishPost($input: PublishPostInput!) {
+      publishPost(input: $input) {
+        post {
+          id
+          url
+          slug
+        }
+      }
+    }
+  `;
+
+  if (dryRun) {
+    console.log(`  [Hashnode DRY RUN] Publish post: "${data.title}"`);
+    console.log(`    Slug: ${slug}`);
+    console.log(`    Canonical URL: ${input.originalArticleURL}`);
+    console.log(`    Publication ID: ${publicationId}`);
+    return { id: 'dry-run-hashnode-id', url: `https://hashnode.com/@amrabed/${slug}` };
+  }
+
+  try {
+    const res = await fetch(HASHNODE_API_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query, variables: { input } }),
+    });
+
+    const json: any = await res.json();
+    if (json.errors && json.errors.length > 0) {
+      console.error(`  [Hashnode ERROR] ${JSON.stringify(json.errors)}`);
+      return null;
+    }
+
+    const postData = json.data?.publishPost?.post;
+    if (postData) {
+      console.log(`  [Hashnode SUCCESS] ID: ${postData.id} | URL: ${postData.url}`);
+      return { id: postData.id, url: postData.url };
+    }
+  } catch (err) {
+    console.error(`  [Hashnode EXCEPTION]`, err);
+  }
+
+  return null;
+}
+
+async function processPost(postDir: string, options: ReturnType<typeof parseArgs>) {
+  const indexFile = path.join(postDir, 'index.md');
+  const slug = path.basename(postDir);
+
+  if (!fs.existsSync(indexFile)) {
+    console.log(`[SKIP] No index.md found in ${postDir}`);
+    return;
+  }
+
+  const rawFile = fs.readFileSync(indexFile, 'utf-8');
+  const post = matter(rawFile);
+  const data = post.data as PostFrontmatter;
+
+  console.log('\n=======================================================');
+  console.log(`Post: ${data.title || slug} (${slug})`);
+  console.log('=======================================================');
+
+  if (!data.platforms) data.platforms = {};
+  if (!data.platforms.devto) {
+    data.platforms.devto = { published: false, id: null, url: null };
+  }
+  if (!data.platforms.hashnode) {
+    data.platforms.hashnode = { published: false, id: null, url: null };
+  }
+  if (!data.platforms.medium) {
+    data.platforms.medium = { published: false, id: null, url: null };
+  }
+
+  const { resolvedContent, coverUrl } = resolveImageUrls(
+    post.content,
+    slug,
+    options.repo,
+    options.branch,
+    options.assetBase,
+    data.cover_image
+  );
+
+  let metadataModified = false;
+
+  // 1. Dev.to
+  if (options.target === 'devto' || options.target === 'all') {
+    const devtoKey = process.env.DEVTO_API_KEY;
+    if (!devtoKey && !options.dryRun) {
+      console.log('  [Dev.to SKIP] DEVTO_API_KEY environment variable not set.');
+    } else {
+      const res = await publishToDevto(
+        post,
+        slug,
+        resolvedContent,
+        coverUrl,
+        devtoKey || 'DRY_RUN_KEY',
+        options.draft,
+        options.dryRun
+      );
+      if (res && !options.dryRun) {
+        data.platforms.devto.id = res.id;
+        data.platforms.devto.url = res.url;
+        if (!options.draft) data.platforms.devto.published = true;
+        metadataModified = true;
+      }
+    }
+  }
+
+  // 2. Hashnode
+  if (options.target === 'hashnode' || options.target === 'all') {
+    const hashnodeToken = process.env.HASHNODE_TOKEN;
+    const hashnodePubId = process.env.HASHNODE_PUBLICATION_ID;
+    if ((!hashnodeToken || !hashnodePubId) && !options.dryRun) {
+      console.log(
+        '  [Hashnode SKIP] HASHNODE_TOKEN and/or HASHNODE_PUBLICATION_ID environment variables not set.'
+      );
+    } else {
+      const res = await publishToHashnode(
+        post,
+        slug,
+        resolvedContent,
+        coverUrl,
+        hashnodeToken || 'DRY_RUN_TOKEN',
+        hashnodePubId || 'DRY_RUN_PUB_ID',
+        options.draft,
+        options.dryRun
+      );
+      if (res && !options.dryRun) {
+        data.platforms.hashnode.id = res.id;
+        data.platforms.hashnode.url = res.url;
+        if (!options.draft) data.platforms.hashnode.published = true;
+        metadataModified = true;
+      }
+    }
+  }
+
+  if (metadataModified && options.updateFrontmatter) {
+    const updated = matter.stringify(post.content, data);
+    fs.writeFileSync(indexFile, updated, 'utf-8');
+    console.log(`  [FRONTMATTER UPDATED] ${indexFile}`);
+  }
+}
+
+async function main() {
+  const options = parseArgs();
+  const postsDir = path.resolve(__dirname, '..', 'posts');
+
+  let postDirs: string[] = [];
+  if (options.post) {
+    const targetDir = path.join(postsDir, options.post);
+    if (!fs.existsSync(targetDir)) {
+      console.error(`Error: Post folder ${targetDir} not found.`);
+      process.exit(1);
+    }
+    postDirs = [targetDir];
+  } else {
+    postDirs = fs
+      .readdirSync(postsDir, { withFileTypes: true })
+      .filter((dirent) => dirent.isDirectory())
+      .map((dirent) => path.join(postsDir, dirent.name))
+      .sort();
+  }
+
+  console.log(
+    `Running publisher: target='${options.target}', dry_run=${options.dryRun}, draft=${options.draft}`
+  );
+
+  for (const dir of postDirs) {
+    await processPost(dir, options);
+  }
+}
+
+main().catch((err) => {
+  console.error('Fatal publisher error:', err);
+  process.exit(1);
+});

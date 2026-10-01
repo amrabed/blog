@@ -17,9 +17,10 @@ This repository serves as the central Git-backed content hub and single source o
 │   │   ├── cover.png        # Hero / cover image
 │   │   └── images/          # Embedded screenshots, diagrams, and media
 ├── scripts/
-│   └── publisher.py         # Multi-platform publisher (Dev.to, Hashnode, Medium)
-├── pyproject.toml           # PEP 621 dependencies, PEP 735 dev group, hatchling, ruff
-├── uv.lock                  # Deterministic dependency lockfile
+│   └── publisher.ts         # Multi-platform publisher (Dev.to, Hashnode)
+├── package.json             # Node dependencies and scripts
+├── pnpm-lock.yaml           # Deterministic dependency lockfile
+├── tsconfig.json            # TypeScript configuration
 ├── .mise.toml               # Task runner & local tool manager
 └── README.md
 ```
@@ -63,31 +64,18 @@ platforms:
 
 ## 🚀 Workflows & Commands
 
-We use [mise](https://mise.jdx.dev) and [uv](https://docs.astral.sh/uv/) for local tooling and task execution.
+We use [mise](https://mise.jdx.dev) and [pnpm](https://pnpm.io/) for local tooling and task execution.
 
 ### 1. Setup Environment
 ```bash
 mise run dev   # or alias: mise run d
 ```
 
-### 2. Verify Lint, Format & Dry-Run
+### 2. Verify Dry-Run
 ```bash
 mise run verify # or alias: mise run v
 ```
 
-
-### 2. Ingest / Convert Medium Articles
-To convert an RSS feed export (`feed.xml`) into refined post directories:
-```bash
-# Preview conversion without writing files
-mise run convert -- --dry-run
-
-# Convert all items from feed.xml
-mise run convert
-
-# Convert a single item by 1-based index (e.g. item 2)
-mise run convert -- --item 2
-```
 
 ### 3. Dry-Run & Verify Posts
 Simulates publishing all posts without modifying remote platforms:

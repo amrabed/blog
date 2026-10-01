@@ -27,11 +27,6 @@ tags:
 title: Stop Writing Lambda Boilerplate
 ---
 
-# Stop Writing Lambda Boilerplate
-
-<!-- **Accelerate your serverless development with production-grade Python templates for AWS Lambda, pre-wired with best practices and modern tooling.** -->
-
-
 Introducing the [**cur8d/lambda**](https://github.com/cur8d/lambda) open-source repository — a collection of production-ready Python Lambda templates for Bedrock Agent, REST API, GraphQL, DynamoDB Stream, EventBridge, S3, and SQS scenarios. These templates come pre-integrated with **AWS Lambda Powertools**, **AWS CDK**, **Pydantic**, and a robust testing infrastructure.
 
 ---

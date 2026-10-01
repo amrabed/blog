@@ -34,7 +34,33 @@ export const metadata: Metadata = {
   creator: "Amr Abed",
   robots: "index, follow",
   icons: {
-    icon: getGravatarUrl(64),
+    icon: [
+      {
+        url: `${basePath}/icon-light.svg`,
+        type: "image/svg+xml",
+        media: "(prefers-color-scheme: light)",
+      },
+      {
+        url: `${basePath}/icon-dark.svg`,
+        type: "image/svg+xml",
+        media: "(prefers-color-scheme: dark)",
+      },
+      {
+        url: `${basePath}/icon.svg`,
+        type: "image/svg+xml",
+      },
+      {
+        url: `${basePath}/favicon.ico`,
+        sizes: "any",
+      },
+    ],
+    apple: [
+      {
+        url: `${basePath}/apple-touch-icon.png`,
+        sizes: "180x180",
+        type: "image/png",
+      },
+    ],
   },
   openGraph: {
     type: "website",

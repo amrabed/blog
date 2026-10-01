@@ -47,16 +47,6 @@ export const Header = () => {
 
         {/* Right: Actions, Links, and Theme Switch */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <a href="https://amrabed.com" className="hidden sm:inline-flex">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-primary rounded-full px-3"
-            >
-              ← amrabed.com
-            </Button>
-          </a>
-
           <Tooltip>
             <Tooltip.Trigger>
               <a href={`${basePath}/rss.xml`}>

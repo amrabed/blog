@@ -12,5 +12,6 @@ dist/
 .env
 .env.*
 .env.local
+public/posts/
 
 

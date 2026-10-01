@@ -1,15 +1,13 @@
 ---
-canonical_url: https://amrabed.medium.com/the-only-aip-c01-study-plan-you-need-fda948411879
+canonical_url: 'https://amrabed.medium.com/the-only-aip-c01-study-plan-you-need-fda948411879'
 cover_image: ./cover.png
 date: '2026-03-24'
-description: I recently passed the new AWS Certified Generative AI Developer Professional
-  (AIP-C01) exam as an early adopter (one of the first 5,000 worldwide). Here’s the
-  exact 6-week plan I used, so you don’t have to figure it out from scratch.
+description: "I recently passed the new AWS Certified Generative AI Developer Professional (AIP-C01) exam as an early adopter (one of the first 5,000 worldwide). Here’s the exact 6-week plan I used, so you don’t have to figure it out from\_scratch."
 platforms:
   devto:
-    id: null
-    published: false
-    url: null
+    id: 4780173
+    published: true
+    url: 'https://dev.to/amrabed/the-only-aip-c01-study-plan-you-need-h9m'
   hashnode:
     id: null
     published: false
@@ -17,14 +15,15 @@ platforms:
   medium:
     id: fda948411879
     published: true
-    url: https://amrabed.medium.com/the-only-aip-c01-study-plan-you-need-fda948411879
+    url: >-
+      https://amrabed.medium.com/the-only-aip-c01-study-plan-you-need-fda948411879
 slug: aip-c01-study-plan
 tags:
-- machine-learning
-- artificial-intelligence
-- generative-ai
-- aws-certification
-- cloud-computing
+  - machine-learning
+  - artificial-intelligence
+  - generative-ai
+  - aws-certification
+  - cloud-computing
 title: The Only AIP-C01 Study Plan You Need
 ---
 

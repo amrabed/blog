@@ -37,19 +37,15 @@ title: Your AI Code Can Be Elegant Too
 updated: '2026-10-02'
 ---
 
-**An Engineer’s Take on Data Science Code**
-
----
-
-![Python code on a dark screen illustrating clean ML code practices](cover.png)
-
-*Photo by [Chris Ried](https://unsplash.com/@cdr6934?utm_source=medium&utm_medium=referral) on [Unsplash](https://unsplash.com?utm_source=medium&utm_medium=referral)*
-
-As the Machine Learning Engineering Manager at an AI-powered SaaS company, I get a front-row seat to the machine learning (ML) code written across data science teams. When I’m not reviewing models and production pipelines, I dabble in the occasional Kaggle competition — though I'll be the first to admit I'm more of an enthusiastic competitor than a podium regular.
+As the Machine Learning Engineering Manager at an AI-powered SaaS company, I get a front-row seat to the machine learning (ML) code written by data science teams. When I'm not reviewing models and production pipelines, I dabble in the occasional Kaggle competition, though I'm more of an enthusiastic competitor than a podium regular.
 
 A recurring pattern quickly emerges: many brilliant data scientists come from mathematics, statistics, or academic research where code is treated merely as a vehicle to run an experiment. Python was adopted as a friendlier upgrade from R or MATLAB. The resulting code may hit top leaderboard accuracy, but in terms of software craftsmanship, it's often about as elegant as a spork.
 
 "Working" code is no longer enough when models move from quick experiments to production pipelines.
+
+![Python code on a dark screen illustrating clean ML code practices](cover.png)
+
+*Photo by [Chris Ried](https://unsplash.com/@cdr6934?utm_source=medium&utm_medium=referral) on [Unsplash](https://unsplash.com?utm_source=medium&utm_medium=referral)*
 
 ---
 

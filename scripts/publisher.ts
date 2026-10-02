@@ -155,6 +155,7 @@ async function publishToDevto(
       tags: string[];
       canonical_url: string;
       description: string;
+      cover_image?: string;
       main_image?: string;
     };
   }
@@ -175,7 +176,7 @@ async function publishToDevto(
       tags: normalizeDevtoTags(data.tags || []),
       canonical_url: data.canonical_url || `https://amrabed.com/blog/${slug}`,
       description: data.description || "",
-      ...(coverUrl ? { main_image: coverUrl } : {}),
+      ...(coverUrl ? { cover_image: coverUrl, main_image: coverUrl } : {}),
     },
   };
 
@@ -185,7 +186,7 @@ async function publishToDevto(
     );
     console.log(`    Tags: ${payload.article.tags.join(", ")}`);
     console.log(`    Canonical URL: ${payload.article.canonical_url}`);
-    if (coverUrl) console.log(`    Main Image: ${coverUrl}`);
+    if (coverUrl) console.log(`    Cover Image: ${coverUrl}`);
     return {
       id: articleId || 123456,
       url: devtoState?.url || `https://dev.to/amrabed/${slug}-dry-run`,
@@ -389,13 +390,22 @@ async function processPost(
     data.platforms.medium = { published: false, id: null, url: null };
   }
 
+  const rawCoverImage =
+    data.cover_image ||
+    (fs.existsSync(path.join(postDir, "cover.png"))
+      ? "./cover.png"
+      : undefined) ||
+    (fs.existsSync(path.join(postDir, "cover.jpg"))
+      ? "./cover.jpg"
+      : undefined);
+
   const { resolvedContent, coverUrl } = resolveImageUrls(
     post.content,
     slug,
     options.repo,
     options.branch,
     options.assetBase,
-    data.cover_image,
+    rawCoverImage,
   );
 
   const bodyMarkdown = stripLeadingTitle(resolvedContent, data.title);

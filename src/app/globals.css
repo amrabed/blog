@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "@heroui/styles";
 @plugin "@tailwindcss/typography";
+@import "nextra-theme-blog/style.css";
 
 @theme {
   --color-primary: var(--heroui-primary);

@@ -142,6 +142,70 @@ function evaluateMdx(
   );
 }
 
+const LANGUAGE_NAMES: Record<string, string> = {
+  js: "JavaScript",
+  javascript: "JavaScript",
+  ts: "TypeScript",
+  typescript: "TypeScript",
+  jsx: "React (JSX)",
+  tsx: "React (TSX)",
+  py: "Python",
+  python: "Python",
+  sh: "Bash",
+  bash: "Bash",
+  shell: "Shell",
+  zsh: "Zsh",
+  json: "JSON",
+  yaml: "YAML",
+  yml: "YAML",
+  sql: "SQL",
+  html: "HTML",
+  css: "CSS",
+  rust: "Rust",
+  rs: "Rust",
+  go: "Go",
+  golang: "Go",
+  dockerfile: "Dockerfile",
+  docker: "Docker",
+  markdown: "Markdown",
+  md: "Markdown",
+  mdx: "MDX",
+  toml: "TOML",
+  c: "C",
+  cpp: "C++",
+  "c++": "C++",
+  csharp: "C#",
+  "c#": "C#",
+  swift: "Swift",
+  kotlin: "Kotlin",
+  diff: "Diff",
+  graphql: "GraphQL",
+};
+
+function formatLanguageName(lang?: string): string {
+  if (!lang) return "Code";
+  return LANGUAGE_NAMES[lang.toLowerCase()] || lang.toUpperCase();
+}
+
+const EnhancedPre = withIcons(Pre);
+
+function CodePre({
+  "data-filename": dataFilename,
+  "data-language": dataLanguage,
+  "data-copy": dataCopy,
+  ...props
+}: React.ComponentProps<typeof Pre>) {
+  const displayLabel = dataFilename || formatLanguageName(dataLanguage);
+  return (
+    <EnhancedPre
+      data-filename={displayLabel}
+      data-language={dataLanguage}
+      data-copy={dataCopy ?? ""}
+      {...props}
+    />
+  );
+}
+
 interface MDXContentProps {
   content: string;
   slug: string;
@@ -195,7 +259,7 @@ export async function MDXContent({ content, slug }: MDXContentProps) {
         />
       );
     },
-    pre: withIcons(Pre),
+    pre: CodePre,
     summary: Summary,
     table: Table,
     td: Table.Td,

@@ -8,6 +8,19 @@ import rehypeHighlight from "rehype-highlight";
 import { Button, Card, Chip } from "@heroui/react";
 import { getAllSlugs, getPostBySlug } from "@/lib/posts";
 import { getGravatarUrl, getSiteUrl } from "@/lib/constants";
+import Mermaid from "@/components/mermaid";
+
+function extractText(node: React.ReactNode): string {
+  if (typeof node === "string") return node;
+  if (typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(extractText).join("");
+  if (node && typeof node === "object" && "props" in node) {
+    return extractText(
+      (node as { props: { children?: React.ReactNode } }).props.children,
+    );
+  }
+  return "";
+}
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
@@ -137,6 +150,31 @@ export default async function BlogPostPage({ params }: PageProps) {
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[rehypeHighlight]}
           components={{
+            pre: ({ children, ...props }) => {
+              const child = Array.isArray(children) ? children[0] : children;
+              if (
+                child &&
+                typeof child === "object" &&
+                "props" in child &&
+                (
+                  child as { props: { className?: string } }
+                ).props?.className?.includes("language-mermaid")
+              ) {
+                return <div>{children}</div>;
+              }
+              return <pre {...props}>{children}</pre>;
+            },
+            code: ({ className, children, ...props }) => {
+              if (className?.includes("language-mermaid")) {
+                const chartText = extractText(children).trim();
+                return <Mermaid chart={chartText} />;
+              }
+              return (
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              );
+            },
             img: ({ src, alt }) => {
               if (!src) return null;
               const srcString = typeof src === "string" ? src : "";

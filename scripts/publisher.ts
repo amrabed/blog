@@ -161,12 +161,17 @@ async function publishToDevto(
 
   const isUpdate = Boolean(devtoState?.id);
   const articleId = devtoState?.id;
+  const isAlreadyPublished = Boolean(
+    devtoState?.published ||
+    (devtoState?.url && !devtoState.url.includes("temp-slug")),
+  );
+  const shouldPublish = isAlreadyPublished || !draft;
 
   const payload: DevtoPayload = {
     article: {
       title: data.title,
       body_markdown: bodyMarkdown,
-      published: !draft,
+      published: shouldPublish,
       tags: normalizeDevtoTags(data.tags || []),
       canonical_url: data.canonical_url || `https://amrabed.com/blog/${slug}`,
       description: data.description || "",
@@ -176,14 +181,15 @@ async function publishToDevto(
 
   if (dryRun) {
     console.log(
-      `  [Dev.to DRY RUN] ${isUpdate ? `Update article #${articleId}` : "Create new article"}: "${data.title}" (${draft ? "DRAFT" : "PUBLIC"})`,
+      `  [Dev.to DRY RUN] ${isUpdate ? `Update article #${articleId}` : "Create new article"}: "${data.title}" (${shouldPublish ? "PUBLIC" : "DRAFT"})`,
     );
     console.log(`    Tags: ${payload.article.tags.join(", ")}`);
     console.log(`    Canonical URL: ${payload.article.canonical_url}`);
     if (coverUrl) console.log(`    Main Image: ${coverUrl}`);
     return {
       id: articleId || 123456,
-      url: `https://dev.to/amrabed/${slug}-dry-run`,
+      url: devtoState?.url || `https://dev.to/amrabed/${slug}-dry-run`,
+      published: shouldPublish,
     };
   }
 
@@ -214,11 +220,19 @@ async function publishToDevto(
       }
 
       if (res.ok) {
-        const json = (await res.json()) as { id: string | number; url: string };
+        const json = (await res.json()) as {
+          id: string | number;
+          url: string;
+          published?: boolean;
+        };
         console.log(
-          `  [Dev.to SUCCESS] ID: ${json.id} | Status: ${draft ? "DRAFT" : "PUBLIC"} | URL: ${json.url}`,
+          `  [Dev.to SUCCESS] ID: ${json.id} | Status: ${shouldPublish ? "PUBLIC" : "DRAFT"} | URL: ${json.url}`,
         );
-        return { id: json.id, url: json.url };
+        return {
+          id: json.id,
+          url: json.url,
+          published: json.published ?? shouldPublish,
+        };
       } else {
         const errorText = await res.text();
         console.error(`  [Dev.to ERROR] Status ${res.status}: ${errorText}`);
@@ -406,10 +420,20 @@ async function processPost(
         options.dryRun,
       );
       if (res && !options.dryRun) {
-        data.platforms.devto.id = res.id;
-        data.platforms.devto.url = res.url;
-        if (!options.draft) data.platforms.devto.published = true;
-        metadataModified = true;
+        const prevDevto = data.platforms.devto;
+        const newPublished = Boolean(
+          res.published ?? prevDevto.published ?? !options.draft,
+        );
+        if (
+          prevDevto.id !== res.id ||
+          prevDevto.url !== res.url ||
+          prevDevto.published !== newPublished
+        ) {
+          prevDevto.id = res.id;
+          prevDevto.url = res.url;
+          prevDevto.published = newPublished;
+          metadataModified = true;
+        }
       }
     }
   }
@@ -434,10 +458,18 @@ async function processPost(
         options.dryRun,
       );
       if (res && !options.dryRun) {
-        data.platforms.hashnode.id = res.id;
-        data.platforms.hashnode.url = res.url;
-        if (!options.draft) data.platforms.hashnode.published = true;
-        metadataModified = true;
+        const prevHashnode = data.platforms.hashnode;
+        const newPublished = Boolean(prevHashnode.published || !options.draft);
+        if (
+          prevHashnode.id !== res.id ||
+          prevHashnode.url !== res.url ||
+          prevHashnode.published !== newPublished
+        ) {
+          prevHashnode.id = res.id;
+          prevHashnode.url = res.url;
+          prevHashnode.published = newPublished;
+          metadataModified = true;
+        }
       }
     }
   }

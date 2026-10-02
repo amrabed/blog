@@ -70,32 +70,23 @@ function rehypeImageFigures() {
           let captionChildren: HastNode[] | null = null;
           if (nextElemIndex !== -1) {
             const nextNode = tree.children[nextElemIndex];
-            if (
-              nextNode.type === "element" &&
-              nextNode.tagName === "p" &&
-              nextNode.children?.length === 1 &&
-              nextNode.children[0].type === "element" &&
-              nextNode.children[0].tagName === "em"
-            ) {
-              captionChildren = nextNode.children[0].children || null;
-              tree.children.splice(i + 1, nextElemIndex - i);
+            if (nextNode.type === "element" && nextNode.tagName === "p") {
+              const nonWhitespaceChildren = nextNode.children?.filter(
+                (c) => !(c.type === "text" && !c.value?.trim()),
+              );
+              if (
+                nonWhitespaceChildren?.length === 1 &&
+                nonWhitespaceChildren[0].type === "element" &&
+                nonWhitespaceChildren[0].tagName === "em"
+              ) {
+                captionChildren = nonWhitespaceChildren[0].children || null;
+                tree.children.splice(i + 1, nextElemIndex - i);
+              }
             }
           }
 
-          if (!captionChildren && imgElements.length === 1) {
-            const alt = imgElements[0].properties?.alt;
-            if (
-              typeof alt === "string" &&
-              alt.trim() &&
-              !/\.(png|jpe?g|webp|gif|svg)$/i.test(alt) &&
-              !/^image[_\s-]?\d+$/i.test(alt)
-            ) {
-              captionChildren = [{ type: "text", value: alt.trim() }];
-            }
-          }
-
-          node.tagName = "figure";
           if (captionChildren) {
+            node.tagName = "figure";
             node.children.push({
               type: "element",
               tagName: "figcaption",

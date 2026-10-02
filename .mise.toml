@@ -41,7 +41,7 @@ run = "pnpm dev"
 [tasks.build]
 alias = ["b"]
 description = "Build static site with Next.js"
-depends = ["install"]
+depends = ["install", "typecheck"]
 run = "pnpm build"
 
 [tasks.start]

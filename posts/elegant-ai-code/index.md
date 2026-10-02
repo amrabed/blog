@@ -72,28 +72,29 @@ Jupyter notebooks are fantastic for interactive exploration, data visualization,
 
 You run cell 14, jump back up to cell 5 to tweak a hyperparameter, execute cell 22, and eventually save the model weights. The saved artifact reflects an invisible, ephemeral execution history that no engineer (including your future self) can reproduce.
 
-### 2. Silent Data Leakage in Preprocessing
+### 2. Non-Deterministic Pipeline Shuffling and Splits
 
-A classic data science bug occurs when feature scalers, encoders, or imputation transforms are fitted across the entire dataset before splitting:
+A subtle bug in deep learning pipelines occurs when datasets are shuffled or partitioned without explicit, centralized random seeds:
 
 ```python
-# Dangerous: Fits statistics on the entire dataset (including test set!)
-from sklearn.preprocessing import StandardScaler
-
-scaler = StandardScaler()
-features_scaled = scaler.fit_transform(raw_features)
-train_x, test_x = train_test_split(features_scaled, test_size=0.2)
+# Fragile: Without a fixed seed, shuffles and splits change on every run
+training_data = training_data.shuffle(buffer_size=1000)
 ```
 
-In modular production code, transforms fit strictly on training splits and only `transform()` validation and test sets:
+Without deterministic seed management:
+- Re-running the notebook evaluates the model on different validation images, making benchmark comparisons meaningless.
+- If you restart the kernel and retrain, images from the previous validation set can shuffle into the new training epochs, causing subtle data contamination.
+
+In production pipelines, random seeds are centralized in configuration and passed explicitly across all data operations:
 
 ```python
-# Clean: Fit exclusively on training data to prevent leakage
-train_x, test_x = train_test_split(raw_features, test_size=0.2)
+# Deterministic: Centralized seed guarantees reproducible training runs
+@dataclass(frozen=True)
+class TrainingConfig:
+    seed: int = 42
+    batch_size: int = 64
 
-scaler = StandardScaler()
-train_x_scaled = scaler.fit_transform(train_x)
-test_x_scaled = scaler.transform(test_x)
+training_data = training_data.shuffle(buffer_size=1000, seed=config.seed)
 ```
 
 ### 3. Hidden In-Place State Mutation
@@ -573,6 +574,7 @@ class TrainingConfig:
     initial_epochs: int = 2
     fine_tune_epochs: int = 1
     fine_tune_learning_rate: float = 1e-5
+    seed: int = 42
 
 
 class ImageDatasetPipeline:
@@ -603,6 +605,7 @@ class ImageDatasetPipeline:
             ds = ds.map(lambda x, y: (self.resize(x), y))
             if augment:
                 ds = ds.map(lambda x, y: (self._augment(x), y))
+                ds = ds.shuffle(buffer_size=1000, seed=self.config.seed)
             return ds.batch(self.config.batch_size).prefetch(AUTOTUNE).cache()
 
         return process(train, augment=True), process(val), process(test)

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useTheme } from "@/contexts/theme";
 
 interface MermaidProps {
@@ -12,6 +12,7 @@ export default function Mermaid({ chart }: MermaidProps) {
   const { theme } = useTheme();
   const [svg, setSvg] = useState<string>("");
   const [hasError, setHasError] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -26,8 +27,15 @@ export default function Mermaid({ chart }: MermaidProps) {
           fontFamily: "inherit",
         });
 
+        // Nextra's remark-mermaid plugin replaces newlines with literal "\n" strings in the JSX AST.
+        // We must unescape them back to real newlines so the Mermaid parser can parse the syntax.
+        const unescapedChart = chart.replaceAll("\\n", "\n").trim();
         const uniqueId = `mermaid_${id}_${Date.now()}`;
-        const { svg: renderedSvg } = await mermaid.render(uniqueId, chart);
+        const { svg: renderedSvg } = await mermaid.render(
+          uniqueId,
+          unescapedChart,
+          containerRef.current ?? undefined,
+        );
         if (isMounted) {
           setSvg(renderedSvg);
           setHasError(false);
@@ -48,16 +56,20 @@ export default function Mermaid({ chart }: MermaidProps) {
   }, [chart, theme, id]);
 
   if (hasError) {
+    const unescapedChart = chart.replaceAll("\\n", "\n").trim();
     return (
       <pre className="overflow-x-auto text-xs p-4 rounded-xl bg-surface border border-divider">
-        <code>{chart}</code>
+        <code>{unescapedChart}</code>
       </pre>
     );
   }
 
   if (!svg) {
     return (
-      <div className="flex items-center justify-center p-8 text-xs text-muted">
+      <div
+        ref={containerRef}
+        className="flex items-center justify-center p-8 text-xs text-muted"
+      >
         Loading diagram...
       </div>
     );
@@ -65,8 +77,10 @@ export default function Mermaid({ chart }: MermaidProps) {
 
   return (
     <div
+      ref={containerRef}
       className="my-6 flex justify-center overflow-x-auto [&>svg]:max-w-full [&>svg]:h-auto"
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   );
 }
+

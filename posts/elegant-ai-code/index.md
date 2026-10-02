@@ -121,21 +121,14 @@ If you want to delve deeper into software craftsmanship, classics like [*Clean C
 
 To bridge the gap between data science experimentation and machine learning engineering, it helps to visualize code quality across three distinct maturity tiers:
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│ Tier 1: Exploratory Script (Notebook Prototype)             │
-│ • Monolithic scripts, smashed imports, global variables     │
-│ • Unencapsulated state, unrepeatable cell execution         │
-├─────────────────────────────────────────────────────────────┤
-│ Tier 2: Clean Idiomatic Python (The "Refactor")             │
-│ • Surgical imports, PEP 8 compliance, descriptive naming    │
-│ • Hyperparameter constants, clean logical stages            │
-├─────────────────────────────────────────────────────────────┤
-│ Tier 3: Modular Object-Oriented Architecture (Production)   │
-│ • Encapsulated classes (Pipeline, Classifier)               │
-│ • Strongly-typed configuration dataclasses                  │
-│ • Unit-testable, importable into APIs & MLOps pipelines     │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    T1["<b>Tier 1: Exploratory Script (Notebook Prototype)</b><br/>• Monolithic scripts, smashed imports, global variables<br/>• Unencapsulated state, unrepeatable cell execution"]
+    T2["<b>Tier 2: Clean Idiomatic Python (The 'Refactor')</b><br/>• Surgical imports, PEP 8 compliance, descriptive naming<br/>• Hyperparameter constants, clean logical stages"]
+    T3["<b>Tier 3: Modular Object-Oriented Architecture (Production)</b><br/>• Encapsulated classes (Pipeline, Classifier)<br/>• Strongly-typed configuration dataclasses<br/>• Unit-testable, importable into APIs & MLOps pipelines"]
+
+    T1 -->|Refactor & Clean| T2
+    T2 -->|Encapsulate & Modularize| T3
 ```
 
 Let's walk through the foundational rules that take you from Tier 1 to Tier 2, and then explore how object-oriented design elevates your code to Tier 3.
@@ -532,29 +525,13 @@ By organizing our machine learning logic with **Object-Oriented Design (OOP)**, 
 
 ### Architectural Component Flow
 
-```
-                  ┌────────────────────────────────────────┐
-                  │       ⚙️  TrainingConfig               │
-                  │  (batch_size, image_size, epochs, lr)  │
-                  └──────────────────┬─────────────────────┘
-                                     │ config
-                 ┌───────────────────┴───────────────────┐
-                 │                                       │
-                 ▼                                       ▼
-    ┌──────────────────────────┐            ┌──────────────────────────┐
-    │  ImageDatasetPipeline    │            │ TransferLearningClassifier│
-    │  - Download & Split      │            │  - Base Xception (Frozen) │
-    │  - Resize & Augment      │            │  - Custom Dense Head     │
-    │  - Batch & Cache (AUTOTUNE)           │  - Head Train / Fine-tune│
-    └────────────┬─────────────┘            └────────────┬─────────────┘
-                 │ (train, val, test)                    │
-                 └───────────────────►───────────────────┘
-                                     │
-                                     ▼
-                        ┌─────────────────────────┐
-                        │   Evaluated Model       │
-                        │   (Inference Ready)     │
-                        └─────────────────────────┘
+```mermaid
+graph TD
+    Config["⚙️ TrainingConfig<br/>(batch_size, image_size, epochs, lr)"]
+    Config -->|config| Pipeline["📦 ImageDatasetPipeline<br/>• Download & Split<br/>• Resize & Augment<br/>• Batch & Cache (AUTOTUNE)"]
+    Config -->|config| Classifier["🧠 TransferLearningClassifier<br/>• Base Xception (Frozen)<br/>• Custom Dense Head<br/>• Head Train / Fine-tune"]
+    Pipeline -->|train, val, test| Classifier
+    Classifier --> Model["🚀 Evaluated Model<br/>(Inference Ready)"]
 ```
 
 ### Designing the Components

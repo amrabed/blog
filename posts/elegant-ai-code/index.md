@@ -3,9 +3,8 @@ canonical_url: 'https://amrabed.medium.com/your-ai-code-can-be-elegant-too-5aaed
 cover_image: ./cover.png
 date: '2024-05-19'
 description: >-
-  Learn how to write clean, maintainable, and production-ready machine learning
-  code. Practical Python and Keras refactoring tips for data scientists and ML
-  engineers.
+  Learn how to transform messy data science scripts into clean, maintainable,
+  object-oriented machine learning pipelines with Python and Keras best practices.
 platforms:
   devto:
     id: 4780206
@@ -69,11 +68,34 @@ When you write code, you are communicating with an audience: your future self si
 
 If you want to delve deeper into software craftsmanship, classics like [*Clean Code*](https://www.goodreads.com/book/show/3735293-clean-code) by Robert Martin and [*The Pragmatic Programmer*](https://www.goodreads.com/book/show/126520556-the-pragmatic-programmer) by David Thomas and Andrew Hunt are timeless investments.
 
-Here, let's focus specifically on practical steps that make machine learning code cleaner, more readable, and enjoyable to maintain.
+---
+
+## The 3-Tier ML Code Maturity Model
+
+To bridge the gap between data science experimentation and machine learning engineering, it helps to visualize code quality across three distinct maturity tiers:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Tier 1: Exploratory Script (Notebook Prototype)             │
+│ • Monolithic scripts, smashed imports, global variables     │
+│ • Unencapsulated state, unrepeatable cell execution         │
+├─────────────────────────────────────────────────────────────┤
+│ Tier 2: Clean Idiomatic Python (The "Refactor")             │
+│ • Surgical imports, PEP 8 compliance, descriptive naming    │
+│ • Hyperparameter constants, clean logical stages            │
+├─────────────────────────────────────────────────────────────┤
+│ Tier 3: Modular Object-Oriented Architecture (Production)   │
+│ • Encapsulated classes (Pipeline, Classifier)               │
+│ • Strongly-typed configuration dataclasses                  │
+│ • Unit-testable, importable into APIs & MLOps pipelines     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+Let's walk through the foundational rules that take you from Tier 1 to Tier 2, and then explore how object-oriented design elevates your code to Tier 3.
 
 ---
 
-## 5 Practical Rules for Elegant Machine Learning Code
+## 5 Foundational Rules for Clean ML Code
 
 ### 1. Learn Your Tools (Stop Reinventing Vectorized Operations)
 
@@ -148,7 +170,7 @@ Modern IDEs like [Visual Studio Code](https://code.visualstudio.com) and PyCharm
 
 Let's look at a concrete example: an image classification transfer learning workflow based on TensorFlow/Keras documentation.
 
-### The "Before" Script
+### The "Before" Script (Tier 1: Exploratory Script)
 
 Here is typical data science code before refactoring:
 
@@ -273,9 +295,9 @@ Notice several opportunities for cleanup:
 
 ---
 
-### The Refactored "After" Code
+### The Refactored Script (Tier 2: Clean Idiomatic Python)
 
-Here is the cleaned, production-ready version of the same script:
+Here is the cleaned, readable version applying our foundational guidelines:
 
 ```python
 from keras import Model
@@ -425,15 +447,195 @@ This clarity eliminates the need to dig through hundreds of lines of notebook co
 
 ---
 
+## Taking It to the Next Level: Object-Oriented ML Architecture (Tier 3)
+
+While Tier 2 is a dramatic improvement over a disorganized notebook, flat procedural scripts still suffer from key limitations when integrated into real production software:
+
+1. **Global State Pollution**: Variables like `base_model`, `model`, and `training_data` float in global module scope. In notebooks or long-running worker processes, this leads to memory leaks and accidental state bleeding.
+2. **Untestable Code**: You cannot write isolated unit tests for your data augmentation or model construction without executing the entire end-to-end training pipeline.
+3. **No Reusability**: If an API engineer needs to serve inference from your trained model in FastAPI or AWS Lambda, they cannot cleanly `import` your model logic without triggering dataset downloads and training routines.
+
+By organizing our machine learning logic with **Object-Oriented Design (OOP)**, **Separation of Concerns**, and **strongly-typed dataclasses**, we achieve production-grade software craftsmanship.
+
+### Designing the Components
+
+We can decompose the workflow into three focused responsibilities:
+- **`TrainingConfig`**: An immutable dataclass holding all hyperparameters and configurations.
+- **`ImageDatasetPipeline`**: Responsible solely for downloading, splitting, caching, and augmenting dataset batches.
+- **`TransferLearningClassifier`**: Responsible solely for building the neural network, compiling, training, fine-tuning, and evaluating.
+
+Here is the Tier 3 implementation:
+
+```python
+from dataclasses import dataclass
+from keras import Model
+from keras.applications import Xception
+from keras.layers import (
+    Dense,
+    Dropout,
+    GlobalAveragePooling2D,
+    Input,
+    RandomFlip,
+    RandomRotation,
+    Rescaling,
+    Resizing,
+)
+from keras.losses import BinaryCrossentropy
+from keras.metrics import BinaryAccuracy
+from keras.optimizers import Adam
+from tensorflow.data import AUTOTUNE, Dataset
+from tensorflow_datasets import disable_progress_bar, load
+
+
+@dataclass(frozen=True)
+class TrainingConfig:
+    """Hyperparameters and runtime settings for the model pipeline."""
+
+    image_size: tuple[int, int] = (150, 150)
+    batch_size: int = 64
+    initial_epochs: int = 2
+    fine_tune_epochs: int = 1
+    fine_tune_learning_rate: float = 1e-5
+
+
+class ImageDatasetPipeline:
+    """Encapsulates data ingestion, preprocessing, and augmentation."""
+
+    def __init__(self, config: TrainingConfig) -> None:
+        self.config = config
+        self.resize = Resizing(*config.image_size)
+        self.augmentation = [RandomFlip("horizontal"), RandomRotation(0.1)]
+
+    def _augment(self, image: Dataset) -> Dataset:
+        for layer in self.augmentation:
+            image = layer(image)
+        return image
+
+    def prepare(
+        self, dataset_name: str = "cats_vs_dogs"
+    ) -> tuple[Dataset, Dataset, Dataset]:
+        """Loads and prepares train, validation, and test dataset splits."""
+        disable_progress_bar()
+        train, val, test = load(
+            dataset_name,
+            split=["train[:40%]", "train[40%:50%]", "train[50%:60%]"],
+            as_supervised=True,
+        )
+
+        def process(ds: Dataset, augment: bool = False) -> Dataset:
+            ds = ds.map(lambda x, y: (self.resize(x), y))
+            if augment:
+                ds = ds.map(lambda x, y: (self._augment(x), y))
+            return ds.batch(self.config.batch_size).prefetch(AUTOTUNE).cache()
+
+        return process(train, augment=True), process(val), process(test)
+
+
+class TransferLearningClassifier:
+    """Encapsulates model architecture, training, and evaluation lifecycle."""
+
+    def __init__(self, config: TrainingConfig) -> None:
+        self.config = config
+        self.base_model = Xception(
+            weights="imagenet",
+            input_shape=(*config.image_size, 3),
+            include_top=False,
+        )
+        self.model = self._build_model()
+
+    def _build_model(self) -> Model:
+        """Constructs the transfer learning model with a custom classification head."""
+        self.base_model.trainable = False  # Freeze base weights initially
+        inputs = Input(shape=(*self.config.image_size, 3), name="input")
+        x = Rescaling(scale=1 / 127.5, offset=-1)(inputs)
+        x = self.base_model(x, training=False)
+        x = GlobalAveragePooling2D()(x)
+        x = Dropout(0.2)(x)
+        outputs = Dense(1)(x)
+        return Model(inputs, outputs)
+
+    def train_head(self, train_data: Dataset, val_data: Dataset) -> None:
+        """Trains only the newly added top classification layers."""
+        self.model.compile(
+            optimizer=Adam(),
+            loss=BinaryCrossentropy(from_logits=True),
+            metrics=[BinaryAccuracy()],
+        )
+        self.model.fit(
+            train_data,
+            epochs=self.config.initial_epochs,
+            validation_data=val_data,
+        )
+
+    def fine_tune(self, train_data: Dataset, val_data: Dataset) -> None:
+        """Unfreezes the base model and fine-tunes with a low learning rate."""
+        self.base_model.trainable = True
+        self.model.compile(
+            optimizer=Adam(self.config.fine_tune_learning_rate),
+            loss=BinaryCrossentropy(from_logits=True),
+            metrics=[BinaryAccuracy()],
+        )
+        self.model.fit(
+            train_data,
+            epochs=self.config.fine_tune_epochs,
+            validation_data=val_data,
+        )
+
+    def evaluate(self, test_data: Dataset) -> dict[str, float]:
+        """Evaluates model performance on unseen test data."""
+        return self.model.evaluate(test_data)
+```
+
+### Running the Modular Pipeline
+
+Look at how clear, readable, and decoupled the execution becomes:
+
+```python
+if __name__ == "__main__":
+    config = TrainingConfig()
+
+    pipeline = ImageDatasetPipeline(config)
+    training_data, validation_data, test_data = pipeline.prepare()
+
+    classifier = TransferLearningClassifier(config)
+    classifier.train_head(training_data, validation_data)
+    classifier.fine_tune(training_data, validation_data)
+    classifier.evaluate(test_data)
+```
+
+Now, every component has a single, well-defined role:
+- Want to swap data augmentation strategies? Touch only `ImageDatasetPipeline`.
+- Want to experiment with a different learning rate or image resolution? Change one value in `TrainingConfig`.
+- Want to write a unit test for image resizing? Test `pipeline.resize` without touching the GPU or initializing a massive neural network.
+- Want to deploy inference to a FastAPI microservice? Import `TransferLearningClassifier` directly and call `predict()`.
+
+---
+
+## Notebook Script vs. Modular OOP Architecture
+
+Here is how the paradigms compare when moving code from research to production:
+
+| Dimension | Notebook Script (Tier 1) | Idiomatic Script (Tier 2) | Modular OOP Architecture (Tier 3) |
+| :--- | :--- | :--- | :--- |
+| **State Scope** | Leaks into global namespace | Top-level module scope | Strictly encapsulated in class instances |
+| **Hyperparameters** | Hardcoded magic numbers | Module constants (`BATCH_SIZE`) | Strongly-typed immutable `@dataclass` |
+| **Unit Testing** | Impossible without executing all cells | Difficult; relies on global state | Trivially testable; components mockable |
+| **Reusability** | Copy-pasting cells | Copying script file | Importable module into FastAPI, Celery, or Kubeflow |
+| **Type Safety** | None | Partial hints | End-to-end type annotations (`Dataset`, `tuple`) |
+
+---
+
 ## The Clean ML Checklist
 
 Before submitting an ML pull request or moving experimental notebook code into production, run through this quick checklist:
 
 - [ ] **Descriptive Naming**: Are variables named for their domain roles (`features`, `target`, `customer_data`) rather than single letters (`x`, `y`, `df`)?
 - [ ] **Surgical Imports**: Are you importing only the functions, classes, and layers required?
-- [ ] **Constants vs State**: Are hyperparameters (`BATCH_SIZE`, `LEARNING_RATE`, `SEED`) declared in uppercase constants?
+- [ ] **Separation of Concerns**: Is data loading separated from model definition and training logic?
+- [ ] **Encapsulated State**: Are models and pipelines encapsulated in classes rather than loose global variables?
+- [ ] **Configurability**: Are hyperparameters grouped into a typed configuration object (`dataclass` / Pydantic)?
 - [ ] **PEP 8 Compliance**: Does code follow standard Python naming conventions and formatting?
-- [ ] **Reproducibility**: Are random seeds set explicitly, and can the script execute from top to bottom in a fresh environment?
+- [ ] **Reproducibility**: Are random seeds set explicitly, and can the pipeline execute from top to bottom in a clean environment?
 - [ ] **Linter & Formatter**: Did you run `ruff check` and `ruff format` (or `black`) before committing?
 
 ---
@@ -442,6 +644,6 @@ Before submitting an ML pull request or moving experimental notebook code into p
 
 Writing clean code in machine learning isn't pedantic nitpicking. It directly impacts your team's velocity, prevents subtle data leaks, and bridges the gap between quick prototypes and reliable production systems.
 
-Strive for clean, readable, and elegant code across every project — whether a weekend Kaggle submission or an enterprise ML pipeline. Your teammates and your future self will thank you.
+Moving from loose notebook cells to clean Python scripts — and ultimately to modular, object-oriented pipelines — is how data science code transforms into resilient software. Strive for clean, readable, and elegant code across every project, whether a weekend Kaggle submission or an enterprise ML pipeline. Your teammates and your future self will thank you.
 
 **What's the hardest clean code habit to adopt in data science workflows? How does your team manage the transition from notebooks to production? Share your thoughts in the comments below!**

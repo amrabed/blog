@@ -37,7 +37,7 @@ title: Your AI Code Can Be Elegant Too
 
 *Photo by [Chris Ried](https://unsplash.com/@cdr6934?utm_source=medium&utm_medium=referral) on [Unsplash](https://unsplash.com?utm_source=medium&utm_medium=referral)*
 
-> ### 💡 Key Takeaways
+> ### Key Takeaways
 >
 > - **The Core Problem**: Unstructured notebook scripts lead to unrepeatable runs, silent data leakage, and painful production handoffs.
 > - **The Solution**: Progress through the **3-Tier ML Code Maturity Model**—from quick prototype scripts, to clean idiomatic Python, to modular, encapsulated OOP pipelines.
@@ -77,7 +77,7 @@ You run cell 14, jump back up to cell 5 to tweak a hyperparameter, execute cell 
 A classic data science bug occurs when feature scalers, encoders, or imputation transforms are fitted across the entire dataset before splitting:
 
 ```python
-# ❌ Dangerous: Fits statistics on the entire dataset (including test set!)
+# Dangerous: Fits statistics on the entire dataset (including test set!)
 from sklearn.preprocessing import StandardScaler
 
 scaler = StandardScaler()
@@ -88,7 +88,7 @@ train_x, test_x = train_test_split(features_scaled, test_size=0.2)
 In modular production code, transforms fit strictly on training splits and only `transform()` validation and test sets:
 
 ```python
-# ✅ Clean: Fit exclusively on training data to prevent leakage
+# Clean: Fit exclusively on training data to prevent leakage
 train_x, test_x = train_test_split(raw_features, test_size=0.2)
 
 scaler = StandardScaler()
@@ -199,7 +199,7 @@ In data science, aliases like `import numpy as np` and `import pandas as pd` are
 The problem arises when developers import massive framework submodules wholesale:
 
 ```python
-# ❌ Cluttered: Forces repetitive keras.layers.* prefixes everywhere
+# Cluttered: Forces repetitive keras.layers.* prefixes everywhere
 from keras import layers
 
 layer = layers.Dense(64)
@@ -208,7 +208,7 @@ layer = layers.Dense(64)
 Versus:
 
 ```python
-# ✅ Clean: Direct, explicit, and self-documenting
+# Clean: Direct, explicit, and self-documenting
 from keras.layers import Dense
 
 layer = Dense(64)
@@ -527,11 +527,11 @@ By organizing our machine learning logic with **Object-Oriented Design (OOP)**, 
 
 ```mermaid
 graph TD
-    Config["⚙️ TrainingConfig<br/>(batch_size, image_size, epochs, lr)"]
-    Config -->|config| Pipeline["📦 ImageDatasetPipeline<br/>• Download & Split<br/>• Resize & Augment<br/>• Batch & Cache (AUTOTUNE)"]
-    Config -->|config| Classifier["🧠 TransferLearningClassifier<br/>• Base Xception (Frozen)<br/>• Custom Dense Head<br/>• Head Train / Fine-tune"]
+    Config["TrainingConfig<br/>(batch_size, image_size, epochs, lr)"]
+    Config -->|config| Pipeline["ImageDatasetPipeline<br/>• Download & Split<br/>• Resize & Augment<br/>• Batch & Cache (AUTOTUNE)"]
+    Config -->|config| Classifier["TransferLearningClassifier<br/>• Base Xception (Frozen)<br/>• Custom Dense Head<br/>• Head Train / Fine-tune"]
     Pipeline -->|train, val, test| Classifier
-    Classifier --> Model["🚀 Evaluated Model<br/>(Inference Ready)"]
+    Classifier --> Model["Evaluated Model<br/>(Inference Ready)"]
 ```
 
 ### Designing the Components

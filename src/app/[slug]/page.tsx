@@ -128,7 +128,7 @@ export default async function BlogPostPage({ params }: PageProps) {
       </header>
 
       {/* Markdown Body */}
-      <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-primary">
+      <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-primary prose-code:before:content-none prose-code:after:content-none">
         <MDXContent content={post.content} slug={slug} />
       </div>
 

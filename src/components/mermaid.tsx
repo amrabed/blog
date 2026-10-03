@@ -83,4 +83,3 @@ export default function Mermaid({ chart }: MermaidProps) {
     />
   );
 }
-

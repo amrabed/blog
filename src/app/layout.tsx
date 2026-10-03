@@ -5,6 +5,7 @@ import Providers from "./providers";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { getGravatarUrl, getSiteUrl } from "@/lib/constants";
+import { getAllPosts } from "@/lib/posts";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -104,14 +105,27 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const searchPosts = getAllPosts().map(
+    ({ title, description, slug, tags, date }) => ({
+      title,
+      description,
+      slug,
+      tags,
+      date,
+    }),
+  );
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${inter.className} antialiased min-h-screen flex flex-col transition-colors duration-500`}
       >
         <Providers>
-          <Header />
-          <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-10">
+          <Header posts={searchPosts} />
+          <main
+            data-pagefind-body
+            className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-10"
+          >
             {children}
           </main>
           <Footer />

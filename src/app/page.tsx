@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Button, Card, Chip } from "@heroui/react";
+import { Card, Chip } from "@heroui/react";
 import { getAllPosts } from "@/lib/posts";
 
 export const dynamic = "force-static";
@@ -20,24 +20,10 @@ export default function BlogIndexPage() {
     <div className="space-y-12">
       {/* Hero Section */}
       <section className="pb-8 border-b border-divider">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <p className="text-base sm:text-lg text-foreground max-w-2xl">
-              Thoughts on Artificial Intelligence, Cloud Architecture, and Smart
-              Automation.
-            </p>
-          </div>
-
-          <a href="https://amrabed.com">
-            <Button
-              variant="secondary"
-              size="sm"
-              className="text-xs font-semibold rounded-lg"
-            >
-              About the Author →
-            </Button>
-          </a>
-        </div>
+        <p className="text-base sm:text-lg text-foreground max-w-2xl">
+          Thoughts on Artificial Intelligence, Cloud Architecture, and Smart
+          Automation.
+        </p>
       </section>
 
       {/* Posts List */}

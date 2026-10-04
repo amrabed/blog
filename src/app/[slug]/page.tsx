@@ -83,23 +83,21 @@ export default async function BlogPostPage({ params }: PageProps) {
 
       {/* Post Header */}
       <header className="mb-10 pb-8 border-b border-divider">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-xs text-muted mb-4">
-          <div className="flex items-center flex-wrap gap-2">
-            <time dateTime={post.date}>{formatDate(post.date)}</time>
-            {post.updated &&
-              formatDate(post.updated) !== formatDate(post.date) && (
-                <>
-                  <span>•</span>
-                  <span>
-                    Updated{" "}
-                    <time dateTime={post.updated}>
-                      {formatDate(post.updated)}
-                    </time>
-                  </span>
-                </>
-              )}
-          </div>
-          <span className="hidden sm:inline">•</span>
+        <div className="flex items-center flex-wrap gap-2 text-xs text-muted mb-3">
+          <time dateTime={post.date}>{formatDate(post.date)}</time>
+          {post.updated &&
+            formatDate(post.updated) !== formatDate(post.date) && (
+              <>
+                <span>•</span>
+                <span>
+                  Updated{" "}
+                  <time dateTime={post.updated}>
+                    {formatDate(post.updated)}
+                  </time>
+                </span>
+              </>
+            )}
+          <span>•</span>
           <div className="flex flex-wrap gap-1.5">
             {post.tags.map((tag) => (
               <Chip key={tag} size="sm" variant="soft" className="tag-chip">

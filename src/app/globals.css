@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "@heroui/styles";
 @plugin "@tailwindcss/typography";
+@import "nextra-theme-blog/style.css";
 
 @theme {
   --color-primary: var(--heroui-primary);
@@ -56,4 +57,16 @@
   border-style: none;
   background-color: var(--heroui-chip-bg);
   color: var(--heroui-chip-fg);
+}
+
+/* Remove default backticks added to inline code by typography */
+.prose
+  :where(code):not(
+    :where([class~="not-prose"], [class~="not-prose"] *)
+  )::before,
+.prose
+  :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *))::after,
+.prose code::before,
+.prose code::after {
+  content: none !important;
 }

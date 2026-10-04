@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import nextra from "nextra";
 
 // Sync posts directory to public/posts so assets are served without symlinks
 // (Vercel build containers fail with ENOTDIR when public/ contains symlinks)
@@ -9,6 +10,10 @@ const publicPostsDir = path.resolve(process.cwd(), "public/posts");
 if (fs.existsSync(postsDir)) {
   fs.cpSync(postsDir, publicPostsDir, { recursive: true });
 }
+
+const withNextra = nextra({
+  defaultShowCopyCode: true,
+});
 
 /** @type {import('next').NextConfig} */
 
@@ -21,4 +26,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextra(nextConfig);

@@ -13,6 +13,7 @@ export interface PostMetadata {
   description: string;
   slug: string;
   date: string;
+  updated?: string;
   canonical_url?: string | null;
   cover_image?: string | null;
   tags: string[];
@@ -59,6 +60,12 @@ export function getPostBySlug(slug: string): Post | null {
   const fileContents = fs.readFileSync(fullPath, "utf8");
   const { data, content } = matter(fileContents);
 
+  const updatedDate = data.updated ? new Date(data.updated) : null;
+  const updated =
+    updatedDate && !isNaN(updatedDate.getTime())
+      ? updatedDate.toISOString()
+      : undefined;
+
   return {
     title: data.title ?? slug,
     description: data.description ?? "",
@@ -66,6 +73,7 @@ export function getPostBySlug(slug: string): Post | null {
     date: data.date
       ? new Date(data.date).toISOString()
       : new Date().toISOString(),
+    ...(updated ? { updated } : {}),
     canonical_url: data.canonical_url ?? null,
     cover_image: data.cover_image ?? null,
     tags: Array.isArray(data.tags) ? data.tags : [],

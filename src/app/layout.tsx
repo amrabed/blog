@@ -106,12 +106,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const searchPosts = getAllPosts().map(
-    ({ title, description, slug, tags, date }) => ({
+    ({ title, description, slug, tags, date, updated }) => ({
       title,
       description,
       slug,
       tags,
       date,
+      updated,
     }),
   );
 

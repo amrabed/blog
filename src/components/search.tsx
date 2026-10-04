@@ -25,6 +25,7 @@ export interface SearchPostItem {
   slug: string;
   tags: string[];
   date: string;
+  updated?: string;
 }
 
 interface SearchProps {

@@ -38,6 +38,7 @@ export async function generateMetadata({
       description: post.description,
       type: "article",
       publishedTime: post.date,
+      ...(post.updated ? { modifiedTime: post.updated } : {}),
       url: `${siteUrl}/${slug}`,
     },
     twitter: {
@@ -82,8 +83,20 @@ export default async function BlogPostPage({ params }: PageProps) {
 
       {/* Post Header */}
       <header className="mb-10 pb-8 border-b border-divider">
-        <div className="flex items-center gap-2 text-xs text-muted mb-3">
+        <div className="flex items-center flex-wrap gap-2 text-xs text-muted mb-3">
           <time dateTime={post.date}>{formatDate(post.date)}</time>
+          {post.updated &&
+            formatDate(post.updated) !== formatDate(post.date) && (
+              <>
+                <span>•</span>
+                <span>
+                  Updated{" "}
+                  <time dateTime={post.updated}>
+                    {formatDate(post.updated)}
+                  </time>
+                </span>
+              </>
+            )}
           <span>•</span>
           <div className="flex flex-wrap gap-1.5">
             {post.tags.map((tag) => (

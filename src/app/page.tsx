@@ -47,8 +47,20 @@ export default function BlogIndexPage() {
             key={post.slug}
             className="group p-6 rounded-2xl border border-divider bg-surface hover:border-primary transition-all duration-300 shadow-none hover:shadow-md"
           >
-            <div className="flex items-center gap-3 text-xs text-muted mb-3">
+            <div className="flex items-center flex-wrap gap-2 text-xs text-muted mb-3">
               <time dateTime={post.date}>{formatDate(post.date)}</time>
+              {post.updated &&
+                formatDate(post.updated) !== formatDate(post.date) && (
+                  <>
+                    <span>•</span>
+                    <span>
+                      Updated{" "}
+                      <time dateTime={post.updated}>
+                        {formatDate(post.updated)}
+                      </time>
+                    </span>
+                  </>
+                )}
               <span>•</span>
               <div className="flex flex-wrap gap-1.5">
                 {post.tags.slice(0, 3).map((tag) => (

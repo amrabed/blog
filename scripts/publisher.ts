@@ -16,6 +16,7 @@ interface PostFrontmatter {
   title: string;
   description?: string;
   date?: string;
+  updated?: string;
   canonical_url?: string | null;
   cover_image?: string;
   tags?: string[];

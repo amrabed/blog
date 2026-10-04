@@ -38,6 +38,7 @@ export async function generateMetadata({
       description: post.description,
       type: "article",
       publishedTime: post.date,
+      ...(post.updated ? { modifiedTime: post.updated } : {}),
       url: `${siteUrl}/${slug}`,
     },
     twitter: {
@@ -82,27 +83,41 @@ export default async function BlogPostPage({ params }: PageProps) {
 
       {/* Post Header */}
       <header className="mb-10 pb-8 border-b border-divider">
-        <div className="flex items-center gap-2 text-xs text-muted mb-3">
-          <time dateTime={post.date}>{formatDate(post.date)}</time>
-          <span>•</span>
-          <div className="flex flex-wrap gap-1.5">
+        {post.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-4">
             {post.tags.map((tag) => (
               <Chip key={tag} size="sm" variant="soft" className="tag-chip">
                 #{tag}
               </Chip>
             ))}
           </div>
-        </div>
+        )}
 
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-heading tracking-tight leading-tight mb-4">
           {post.title}
         </h1>
 
         {post.description && (
-          <p className="text-lg text-foreground leading-relaxed font-normal">
+          <p className="text-lg text-foreground leading-relaxed font-normal mb-4">
             {post.description}
           </p>
         )}
+
+        <div className="flex items-center flex-wrap gap-2 text-xs text-muted">
+          <time dateTime={post.date}>{formatDate(post.date)}</time>
+          {post.updated &&
+            formatDate(post.updated) !== formatDate(post.date) && (
+              <>
+                <span>•</span>
+                <span>
+                  Updated{" "}
+                  <time dateTime={post.updated}>
+                    {formatDate(post.updated)}
+                  </time>
+                </span>
+              </>
+            )}
+        </div>
 
         {/* Canonical Attribution Banner */}
         {post.canonical_url && (

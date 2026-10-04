@@ -52,7 +52,7 @@
 
 @utility tag-chip {
   font-size: 11px;
-  padding: 0 0.25rem;
+  padding: 0 0.625rem;
   height: 1.5rem;
   border-style: none;
   background-color: var(--heroui-chip-bg);

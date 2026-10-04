@@ -16,6 +16,7 @@ export interface PostMetadata {
   canonical_url?: string | null;
   cover_image?: string | null;
   tags: string[];
+  comments?: boolean;
   platforms?: {
     devto?: PlatformMetadata;
     hashnode?: PlatformMetadata;
@@ -68,6 +69,7 @@ export function getPostBySlug(slug: string): Post | null {
     canonical_url: data.canonical_url ?? null,
     cover_image: data.cover_image ?? null,
     tags: Array.isArray(data.tags) ? data.tags : [],
+    comments: data.comments !== false,
     platforms: data.platforms ?? {},
     content: stripLeadingTitle(content, data.title),
   };

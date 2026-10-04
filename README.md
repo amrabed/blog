@@ -37,6 +37,7 @@ It powers two core functions:
 │   │   └── rss.xml/
 │   │       └── route.ts     # RSS 2.0 feed route handler
 │   ├── components/
+│   │   ├── comments.tsx     # Giscus discussion & comments widget integrated with theme
 │   │   ├── footer.tsx       # HeroUI Footer matching amrabed.com with social links
 │   │   ├── header.tsx       # Minimalist header with HeroUI buttons & theme switch
 │   │   └── theme-toggle.tsx # HeroUI Switch dark/light mode toggle

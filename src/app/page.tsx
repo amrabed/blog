@@ -47,29 +47,20 @@ export default function BlogIndexPage() {
             key={post.slug}
             className="group p-6 rounded-2xl border border-divider bg-surface hover:border-primary transition-all duration-300 shadow-none hover:shadow-md"
           >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 text-xs text-muted mb-3">
-              <div className="flex items-center flex-wrap gap-2">
-                <time dateTime={post.date}>{formatDate(post.date)}</time>
-                {post.updated &&
-                  formatDate(post.updated) !== formatDate(post.date) && (
-                    <>
-                      <span>•</span>
-                      <span>
-                        Updated{" "}
-                        <time dateTime={post.updated}>
-                          {formatDate(post.updated)}
-                        </time>
-                      </span>
-                    </>
-                  )}
-              </div>
-              <div className="flex flex-wrap gap-1.5 sm:justify-end">
-                {post.tags.slice(0, 3).map((tag) => (
-                  <Chip key={tag} size="sm" variant="soft" className="tag-chip">
-                    #{tag}
-                  </Chip>
-                ))}
-              </div>
+            <div className="flex items-center flex-wrap gap-2 text-xs text-muted mb-3">
+              <time dateTime={post.date}>{formatDate(post.date)}</time>
+              {post.updated &&
+                formatDate(post.updated) !== formatDate(post.date) && (
+                  <>
+                    <span>•</span>
+                    <span>
+                      Updated{" "}
+                      <time dateTime={post.updated}>
+                        {formatDate(post.updated)}
+                      </time>
+                    </span>
+                  </>
+                )}
             </div>
 
             <h2 className="text-xl sm:text-2xl font-bold text-heading group-hover:text-primary transition-colors mb-2 leading-snug">
@@ -79,9 +70,19 @@ export default function BlogIndexPage() {
             </h2>
 
             {post.description && (
-              <p className="text-sm text-foreground leading-relaxed line-clamp-2 mb-4">
+              <p className="text-sm text-foreground leading-relaxed line-clamp-2 mb-3">
                 {post.description}
               </p>
+            )}
+
+            {post.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {post.tags.slice(0, 3).map((tag) => (
+                  <Chip key={tag} size="sm" variant="soft" className="tag-chip">
+                    #{tag}
+                  </Chip>
+                ))}
+              </div>
             )}
 
             <div className="mt-auto flex items-center justify-between w-full pt-2 text-xs text-muted border-t border-divider">

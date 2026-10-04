@@ -13,6 +13,7 @@ if (fs.existsSync(postsDir)) {
 
 const withNextra = nextra({
   defaultShowCopyCode: true,
+  search: { codeblocks: false },
 });
 
 /** @type {import('next').NextConfig} */

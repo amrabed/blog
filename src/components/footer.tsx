@@ -49,7 +49,10 @@ const socialProfiles: SocialProfile[] = [
 
 export function Footer() {
   return (
-    <footer className="w-full bg-background border-t border-divider transition-colors duration-300 py-12 px-6 mt-16">
+    <footer
+      data-pagefind-ignore="all"
+      className="w-full bg-background border-t border-divider transition-colors duration-300 py-12 px-6 mt-16"
+    >
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
         <div className="flex flex-col items-center md:items-start gap-1 text-center md:text-left order-2 md:order-1">
           <p className="text-sm font-medium text-heading">

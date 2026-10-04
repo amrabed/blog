@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Button, Tooltip } from "@heroui/react";
 import { FaGithub, FaRss } from "react-icons/fa6";
 import ThemeToggle from "./theme-toggle";
+import Search, { SearchPostItem } from "./search";
 import { getGravatarUrl } from "@/lib/constants";
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
@@ -33,12 +34,19 @@ const navActions: NavAction[] = [
   },
 ];
 
-export function Header() {
+interface HeaderProps {
+  posts?: SearchPostItem[];
+}
+
+export function Header({ posts = [] }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-background/80 border-b border-divider transition-colors duration-300">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <header
+      data-pagefind-ignore="all"
+      className="sticky top-0 z-40 w-full backdrop-blur-md bg-background/80 border-b border-divider transition-colors duration-300"
+    >
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
         {/* Left: Author identity and blog title */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           <a
             href="https://amrabed.com"
             className="group flex items-center gap-2.5 text-sm font-medium text-foreground hover:text-primary transition-colors"
@@ -69,8 +77,10 @@ export function Header() {
           </Link>
         </div>
 
-        {/* Right: Actions, Links, and Theme Switch */}
+        {/* Right: Actions, Links, Search, and Theme Switch */}
         <div className="flex items-center gap-2 sm:gap-3">
+          <Search posts={posts} />
+
           {navActions.map(({ name, href, icon, className, target, rel }) => (
             <Tooltip key={name}>
               <Tooltip.Trigger>

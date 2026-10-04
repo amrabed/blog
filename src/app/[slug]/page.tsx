@@ -6,6 +6,7 @@ import { Button, Card, Chip } from "@heroui/react";
 import { getAllSlugs, getPostBySlug } from "@/lib/posts";
 import { getGravatarUrl, getSiteUrl } from "@/lib/constants";
 import { MDXContent } from "@/components/mdx-content";
+import { Comments } from "@/components/comments";
 
 export async function generateStaticParams() {
   const slugs = getAllSlugs();
@@ -171,6 +172,9 @@ export default async function BlogPostPage({ params }: PageProps) {
           </div>
         </Card>
       </footer>
+
+      {/* Discussion & Comments */}
+      {post.comments !== false && <Comments slug={slug} />}
     </article>
   );
 }

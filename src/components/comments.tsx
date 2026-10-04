@@ -13,9 +13,9 @@ export function Comments({ slug }: CommentsProps) {
   const repo = (process.env.NEXT_PUBLIC_GISCUS_REPO ||
     "amrabed/blog") as `${string}/${string}`;
   const repoId = process.env.NEXT_PUBLIC_GISCUS_REPO_ID || "R_kgDOL6Wcqw";
-  const category = process.env.NEXT_PUBLIC_GISCUS_CATEGORY || "Announcements";
+  const category = process.env.NEXT_PUBLIC_GISCUS_CATEGORY || "Comments";
   const categoryId =
-    process.env.NEXT_PUBLIC_GISCUS_CATEGORY_ID || "DIC_kwDOL6Wcq84DHBEZ";
+    process.env.NEXT_PUBLIC_GISCUS_CATEGORY_ID || "DIC_kwDOL6Wcq84DHBIQ";
 
   if (!repo || !repoId) return null;
 

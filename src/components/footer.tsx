@@ -58,9 +58,6 @@ export function Footer() {
           <p className="text-sm font-medium text-heading">
             © {new Date().getFullYear()} Amr Abed
           </p>
-          <p className="text-xs text-muted">
-            Built with Next.js, Tailwind CSS, and HeroUI
-          </p>
         </div>
 
         <div className="flex flex-row flex-wrap justify-center gap-2 order-1 md:order-2">

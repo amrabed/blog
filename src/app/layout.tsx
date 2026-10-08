@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import { ECOSYSTEM_ICONS, Footer, NavBar, Providers } from "@amrabed/ui";
+import { Footer, NavBar, Providers, icons } from "@amrabed/ui";
 import Search from "@/components/search";
 import Rss from "@/components/rss";
 import { getGravatarUrl, getSiteUrl } from "@/lib/constants";
@@ -34,16 +34,7 @@ export const metadata: Metadata = {
   authors: [{ name: "Amr Abed", url: "https://amrabed.com" }],
   creator: "Amr Abed",
   robots: "index, follow",
-  icons: {
-    ...ECOSYSTEM_ICONS,
-    icon: [
-      ...ECOSYSTEM_ICONS.icon,
-      {
-        url: `${basePath}/favicon.ico`,
-        sizes: "any",
-      },
-    ],
-  },
+  icons,
   openGraph: {
     type: "website",
     locale: "en_US",

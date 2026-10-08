@@ -2,7 +2,7 @@
 @import "@heroui/styles";
 @plugin "@tailwindcss/typography";
 @import "nextra-theme-blog/style.css";
-@source "../../node_modules/@amrabed/ui";
+@import "@amrabed/ui";
 
 @theme {
   --color-primary: var(--heroui-primary);

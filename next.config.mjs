@@ -22,6 +22,7 @@ const nextConfig = {
   output: "export",
   basePath: process.env.NEXT_PUBLIC_BASE_PATH,
   reactStrictMode: true,
+  transpilePackages: ["@amrabed/ui"],
   images: {
     unoptimized: true,
   },

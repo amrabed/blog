@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import Providers from "./providers";
-import Header from "@/components/header";
-import Footer from "@/components/footer";
+import { ECOSYSTEM_ICONS, Footer, NavBar, Providers } from "@amrabed/ui";
+import Search from "@/components/search";
+import Rss from "@/components/rss";
 import { getGravatarUrl, getSiteUrl } from "@/lib/constants";
 import { getAllPosts } from "@/lib/posts";
 import "./globals.css";
@@ -35,31 +35,12 @@ export const metadata: Metadata = {
   creator: "Amr Abed",
   robots: "index, follow",
   icons: {
+    ...ECOSYSTEM_ICONS,
     icon: [
-      {
-        url: `${basePath}/icon-light.svg`,
-        type: "image/svg+xml",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: `${basePath}/icon-dark.svg`,
-        type: "image/svg+xml",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: `${basePath}/icon.svg`,
-        type: "image/svg+xml",
-      },
+      ...ECOSYSTEM_ICONS.icon,
       {
         url: `${basePath}/favicon.ico`,
         sizes: "any",
-      },
-    ],
-    apple: [
-      {
-        url: `${basePath}/apple-touch-icon.png`,
-        sizes: "180x180",
-        type: "image/png",
       },
     ],
   },
@@ -122,14 +103,22 @@ export default function RootLayout({
         className={`${inter.className} antialiased min-h-screen flex flex-col transition-colors duration-500`}
       >
         <Providers>
-          <Header posts={searchPosts} />
+          <NavBar
+            currentSite="blog"
+            repo="amrabed/blog"
+            showLogo={false}
+            showNavLinks={false}
+          >
+            <Search posts={searchPosts} />
+            <Rss />
+          </NavBar>
           <main
             data-pagefind-body
             className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-10"
           >
             {children}
           </main>
-          <Footer />
+          <Footer className="mt-16" />
         </Providers>
       </body>
       <GoogleAnalytics gaId="G-JKPDWZ2PLD" />

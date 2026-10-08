@@ -12,37 +12,35 @@ interface HeaderProps {
 
 export function Header({ posts = [] }: HeaderProps) {
   return (
-    <div data-pagefind-ignore="all">
-      <NavBar
-        currentSite="blog"
-        repo="amrabed/blog"
-        avatarUrl={getGravatarUrl(64)}
-        actions={
-          <>
-            <Search posts={posts} />
-            <Tooltip>
-              <Tooltip.Trigger>
-                <a href={`${basePath}/rss.xml`}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    isIconOnly
-                    aria-label="RSS Feed"
-                    className="text-muted rounded-full hover:text-amber-500"
-                  >
-                    <FaRss className="size-4" aria-hidden="true" />
-                  </Button>
-                </a>
-              </Tooltip.Trigger>
-              <Tooltip.Content>
-                <Tooltip.Arrow />
-                RSS Feed
-              </Tooltip.Content>
-            </Tooltip>
-          </>
-        }
-      />
-    </div>
+    <NavBar
+      currentSite="blog"
+      repo="amrabed/blog"
+      avatarUrl={getGravatarUrl(64)}
+      actions={
+        <>
+          <Search posts={posts} />
+          <Tooltip>
+            <Tooltip.Trigger>
+              <a href={`${basePath}/rss.xml`}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  isIconOnly
+                  aria-label="RSS Feed"
+                  className="text-muted rounded-full hover:text-amber-500"
+                >
+                  <FaRss className="size-4" aria-hidden="true" />
+                </Button>
+              </a>
+            </Tooltip.Trigger>
+            <Tooltip.Content>
+              <Tooltip.Arrow />
+              RSS Feed
+            </Tooltip.Content>
+          </Tooltip>
+        </>
+      }
+    />
   );
 }
 

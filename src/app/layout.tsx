@@ -1,10 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import { ECOSYSTEM_ICONS } from "@amrabed/ui";
-import Providers from "./providers";
-import Header from "@/components/header";
-import Footer from "@/components/footer";
+import { ECOSYSTEM_ICONS, Footer, NavBar, Providers } from "@amrabed/ui";
+import Search from "@/components/search";
+import Rss from "@/components/rss";
 import { getGravatarUrl, getSiteUrl } from "@/lib/constants";
 import { getAllPosts } from "@/lib/posts";
 import "./globals.css";
@@ -104,14 +103,21 @@ export default function RootLayout({
         className={`${inter.className} antialiased min-h-screen flex flex-col transition-colors duration-500`}
       >
         <Providers>
-          <Header posts={searchPosts} />
+          <NavBar
+            currentSite="blog"
+            repo="amrabed/blog"
+            avatarUrl={getGravatarUrl(64)}
+          >
+            <Search posts={searchPosts} />
+            <Rss />
+          </NavBar>
           <main
             data-pagefind-body
             className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-10"
           >
             {children}
           </main>
-          <Footer />
+          <Footer className="mt-16" />
         </Providers>
       </body>
       <GoogleAnalytics gaId="G-JKPDWZ2PLD" />

@@ -106,7 +106,8 @@ export default function RootLayout({
           <NavBar
             currentSite="blog"
             repo="amrabed/blog"
-            avatarUrl={getGravatarUrl(64)}
+            showLogo={false}
+            showNavLinks={false}
           >
             <Search posts={searchPosts} />
             <Rss />

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { ECOSYSTEM_ICONS } from "@amrabed/ui";
 import Providers from "./providers";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
@@ -35,31 +36,12 @@ export const metadata: Metadata = {
   creator: "Amr Abed",
   robots: "index, follow",
   icons: {
+    ...ECOSYSTEM_ICONS,
     icon: [
-      {
-        url: `${basePath}/icon-light.svg`,
-        type: "image/svg+xml",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: `${basePath}/icon-dark.svg`,
-        type: "image/svg+xml",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: `${basePath}/icon.svg`,
-        type: "image/svg+xml",
-      },
+      ...ECOSYSTEM_ICONS.icon,
       {
         url: `${basePath}/favicon.ico`,
         sizes: "any",
-      },
-    ],
-    apple: [
-      {
-        url: `${basePath}/apple-touch-icon.png`,
-        sizes: "180x180",
-        type: "image/png",
       },
     ],
   },

@@ -1,8 +1,8 @@
 "use client";
 
 import type { PropsWithChildren } from "react";
-import ThemeProvider from "@/contexts/theme";
+import { Providers as SharedProviders } from "@amrabed/ui";
 
 export default function Providers({ children }: PropsWithChildren) {
-  return <ThemeProvider>{children}</ThemeProvider>;
+  return <SharedProviders>{children}</SharedProviders>;
 }

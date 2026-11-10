@@ -39,6 +39,7 @@ minimumReleaseAgeExclude:
 
 overrides:
   undici: "^6.29.1"
+  zod: "^4.6.7"
   "@xmldom/xmldom": ">=0.9.12"
   katex: ">=0.18.2"
   lodash-es: ">=4.18.1"

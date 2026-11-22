@@ -19,6 +19,8 @@ export default function BlogIndexPage() {
 
   return (
     <div className="space-y-12">
+      <h1 className="sr-only">Amr Abed&apos;s Blog</h1>
+
       {/* Hero Section */}
       <section className="pb-8 border-b border-divider">
         <p className="text-base sm:text-lg text-foreground max-w-2xl">

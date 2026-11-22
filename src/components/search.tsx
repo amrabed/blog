@@ -395,6 +395,16 @@ export function Search({ posts = [] }: SearchProps) {
                 <input
                   ref={inputRef}
                   type="search"
+                  role="combobox"
+                  aria-label="Search articles"
+                  aria-autocomplete="list"
+                  aria-expanded={Boolean(query.trim()) && results.length > 0}
+                  aria-controls="search-results-listbox"
+                  aria-activedescendant={
+                    query.trim() && results[activeIndex]
+                      ? `search-result-${activeIndex}`
+                      : undefined
+                  }
                   value={query}
                   onChange={(e) => handleQueryChange(e.target.value)}
                   onKeyDown={handleKeyDown}
@@ -411,7 +421,7 @@ export function Search({ posts = [] }: SearchProps) {
                       handleQueryChange("");
                       inputRef.current?.focus();
                     }}
-                    className="p-1 rounded-md text-muted hover:text-foreground hover:bg-divider/40 transition-colors"
+                    className="p-1 rounded-md text-muted hover:text-foreground hover:bg-divider/40 transition-colors cursor-pointer"
                     aria-label="Clear query"
                   >
                     <XMarkIcon className="size-4" aria-hidden="true" />
@@ -440,7 +450,12 @@ export function Search({ posts = [] }: SearchProps) {
                   </div>
                 ) : query.trim() ? (
                   results.length > 0 ? (
-                    <div className="space-y-1">
+                    <div
+                      id="search-results-listbox"
+                      role="listbox"
+                      aria-label="Search results"
+                      className="space-y-1"
+                    >
                       <div className="px-3 py-1.5 text-[11px] font-semibold text-muted uppercase tracking-wider">
                         {results.length} result{results.length === 1 ? "" : "s"}{" "}
                         found
@@ -450,6 +465,9 @@ export function Search({ posts = [] }: SearchProps) {
                         return (
                           <div
                             key={`${item.url}-${index}`}
+                            id={`search-result-${index}`}
+                            role="option"
+                            aria-selected={isSelected}
                             data-result-index={index}
                             onClick={() => handleSelect(item)}
                             onMouseEnter={() => setActiveIndex(index)}

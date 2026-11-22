@@ -6,6 +6,7 @@ import Search from "@/components/search";
 import Rss from "@/components/rss";
 import { getGravatarUrl, getSiteUrl } from "@/lib/constants";
 import { getAllPosts } from "@/lib/posts";
+import "katex/dist/katex.min.css";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });

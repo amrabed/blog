@@ -3,28 +3,43 @@ import { getSiteUrl } from "@/lib/constants";
 
 export const dynamic = "force-static";
 
+function escapeCdata(value: string): string {
+  return value.replaceAll("]]>", "]]]]><![CDATA[>");
+}
+
+function escapeXml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&apos;");
+}
+
 export async function GET() {
   const posts = getAllPosts();
   const siteUrl = getSiteUrl();
+  const escapedSiteUrl = escapeXml(siteUrl);
 
   const itemsXml = posts
-    .map(
-      (post) => `
+    .map((post) => {
+      const postUrl = escapeXml(`${siteUrl}/${post.slug}/`);
+      return `
     <item>
-      <title><![CDATA[${post.title}]]></title>
-      <link>${siteUrl}/${post.slug}/</link>
-      <guid>${siteUrl}/${post.slug}/</guid>
+      <title><![CDATA[${escapeCdata(post.title)}]]></title>
+      <link>${postUrl}</link>
+      <guid>${postUrl}</guid>
       <pubDate>${new Date(post.date).toUTCString()}</pubDate>
-      <description><![CDATA[${post.description}]]></description>
-    </item>`,
-    )
+      <description><![CDATA[${escapeCdata(post.description)}]]></description>
+    </item>`;
+    })
     .join("\n");
 
   const rss = `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0">
   <channel>
     <title>Amr Abed's Blog</title>
-    <link>${siteUrl}</link>
+    <link>${escapedSiteUrl}</link>
     <description>Technical articles and thoughts on AI, Cloud Architecture, and Software Engineering by Amr Abed.</description>
     <language>en-us</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>

@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { Button, Card, Chip } from "@heroui/react";
+import { Card, Chip } from "@heroui/react";
+import { buttonVariants } from "@heroui/styles";
 import { getAllSlugs, getPostBySlug } from "@/lib/posts";
 import { getGravatarUrl, getSiteUrl } from "@/lib/constants";
 import { MDXContent } from "@/components/mdx-content";
@@ -70,14 +71,16 @@ export default async function BlogPostPage({ params }: PageProps) {
     <article className="max-w-3xl mx-auto">
       {/* Back Navigation */}
       <div className="mb-8">
-        <Link href="/">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-xs font-semibold text-muted hover:text-primary rounded-lg -ml-2"
-          >
-            ← Back to all articles
-          </Button>
+        <Link
+          href="/"
+          className={buttonVariants({
+            variant: "ghost",
+            size: "sm",
+            className:
+              "text-xs font-semibold text-muted hover:text-primary rounded-lg -ml-2",
+          })}
+        >
+          ← Back to all articles
         </Link>
       </div>
 
